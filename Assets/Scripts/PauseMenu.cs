@@ -57,7 +57,7 @@ public class PauseMenu : MonoBehaviour
     {
         //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("MainMneuScene");
     }
 
     private void VolumeButton()
