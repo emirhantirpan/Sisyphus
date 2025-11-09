@@ -5,7 +5,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float[] lanePositionsX;
     [SerializeField] private float laneChangeForce = 500f;
     [SerializeField] private float minSwipeDistance = 50.0f;
-    [SerializeField] private float forwardForce = 1000f; 
+    [SerializeField] private float forwardForce = 1000f;
+     private CameraController mainCamera;
 
  
     private int currentLane = 1;
@@ -21,10 +22,15 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("PlayerController bir Rigidbody bileşeni gerektiriyor!");
         }
     }
+    void Start()
+    {
+        mainCamera = Camera.main.GetComponent<CameraController>();
+    }
 
     void Update()
     {
-        // Girdi (Input) alma kısmı Update'te kalmalı (değişiklik yok)
+       
+        
 #if UNITY_EDITOR
         if (Input.GetMouseButtonDown(0)) { startTouchPosition = Input.mousePosition; }
         else if (Input.GetMouseButtonUp(0)) { endTouchPosition = Input.mousePosition; HandleSwipe(); }
@@ -86,5 +92,26 @@ public class PlayerController : MonoBehaviour
     {
         int newLane = currentLane + direction;
         currentLane = Mathf.Clamp(newLane, 0, lanePositionsX.Length - 1);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            if (mainCamera != null)
+            {
+                mainCamera.TriggerJolt();
+            }
+        }
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Obstacle"))
+        {
+            if (mainCamera != null)
+            {
+                mainCamera.TriggerRecover();
+            }
+        }
     }
 }

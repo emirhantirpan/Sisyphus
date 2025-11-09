@@ -9,9 +9,15 @@ public class LevelGenerator : MonoBehaviour
     public float spawnDistanceThreshold = 75.0f;
 
     public List<GameObject> obstaclePrefabs;
-
     [Range(0, 1)]
-    public float obstacleSpawnChance = 0.5f;
+    public float minObstacleSpawnChance = 0.1f;
+    [Range(0, 1)]
+    public float maxObstacleSpawnChance = 0.5f;
+    public float timeToMaxDifficulty = 120.0f;
+
+    public GameObject maskPrefab;
+    [Range(0, 1)]
+    public float maskSpawnChance = 0.2f;
 
     private List<GameObject> activeSegments = new List<GameObject>();
     private Transform nextSpawnPoint;
@@ -21,7 +27,6 @@ public class LevelGenerator : MonoBehaviour
         GameObject initialSegment = Instantiate(roadSegmentPrefab);
         initialSegment.transform.position = Vector3.zero;
         activeSegments.Add(initialSegment);
-
         nextSpawnPoint = initialSegment.transform.Find("SpawnPoint");
 
         for (int i = 1; i <= initialSegments; i++)
@@ -48,27 +53,49 @@ public class LevelGenerator : MonoBehaviour
 
     }
 
-    void SpawnSegment(bool spawnObstacles)
+    void SpawnSegment(bool spawnItems)
     {
         GameObject newSegment = Instantiate(roadSegmentPrefab,nextSpawnPoint.position, nextSpawnPoint.rotation);
         activeSegments.Add(newSegment);
 
         nextSpawnPoint = newSegment.transform.Find("SpawnPoint");
 
-        if (spawnObstacles && obstaclePrefabs.Count > 0)
+        if (spawnItems && (obstaclePrefabs.Count > 0 || maskPrefab != null))
         {
             Transform spawnerParent = newSegment.transform.Find("ObstacleSpawners");
 
-            if(spawnerParent != null)
+            if(spawnerParent != null && spawnerParent.childCount > 0    )
             {
-                foreach (Transform spawner in spawnerParent)
-                {
-                    if(Random.value < obstacleSpawnChance)
-                    {
-                        int prefabIndex = Random.Range(0,obstaclePrefabs.Count);
-                        GameObject obstacleToSpawn = obstaclePrefabs[prefabIndex];
+                float progress = Mathf.Clamp01(Time.timeSinceLevelLoad / timeToMaxDifficulty);
 
-                        Instantiate(obstacleToSpawn, spawner.position, spawner.rotation,spawner);
+                float currentObstacleChance = Mathf.Lerp(minObstacleSpawnChance, maxObstacleSpawnChance, progress);
+
+                int laneCount = spawnerParent.childCount;
+
+                int safeLaneIndex = Random.Range(0,laneCount);
+
+                for (int i = 0; i < laneCount; i++)
+                {
+                    if(i == safeLaneIndex)
+                    {
+                        continue;
+                    }
+
+                    Transform spawner = spawnerParent.GetChild(i);
+
+                    if(Random.value < currentObstacleChance)
+                    {
+                        int prefabIndex = Random.Range(0, obstaclePrefabs.Count);
+                        GameObject obstacleToSpawn = obstaclePrefabs[prefabIndex];
+                        Instantiate(obstacleToSpawn, spawner.position, spawner.rotation, spawner);
+
+                    }
+                    else
+                    {
+                        if(maskPrefab != null && Random.value < maskSpawnChance)
+                        {
+                            Instantiate(maskPrefab, spawner.position, spawner.rotation, spawner);
+                        }
                     }
                 }
             }
