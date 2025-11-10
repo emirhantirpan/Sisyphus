@@ -9,7 +9,12 @@ public class GameManager : MonoBehaviour
     public Transform player;
     public Transform cameraTransform;
 
-    [SerializeField] private float _deathDistanceBehind = 10f;
+    public float gracePeriod = 2.0f;
+    public float raycastDistance = 50f;
+
+    private float timeSpentUnseen = 0.0f;
+
+    
     private void Awake()
     {
         if(instance == null)
@@ -25,27 +30,42 @@ public class GameManager : MonoBehaviour
     {
         isGameOver = false;
         Time.timeScale = 1;
+        timeSpentUnseen = 0.0f;
     }
 
     private void Update()
     {
-        if (isGameOver)
+        if (isGameOver || player == null || cameraTransform == null)
         {
             return;
         }
-        if (player == null || cameraTransform == null)
-        {
-            return;
-
-        }
-        CheckIfCaught();
+        
+        CheckIfPlayerIsVisible();
     }
 
-    private void CheckIfCaught()
+   private void CheckIfPlayerIsVisible()
     {
-        float distance = player.position.z - cameraTransform.position.z;
+        Vector3 targetPos = player.position + (Vector3.up * 0.5f);
+        Vector3 direction = (targetPos- cameraTransform.position).normalized;
 
-        if(distance < -_deathDistanceBehind)
+        RaycastHit hit;
+
+        if (Physics.Raycast(cameraTransform.position, direction, out hit, raycastDistance))
+        {
+            if (hit.collider.CompareTag("Player"))
+            {
+                timeSpentUnseen = 0.0f;
+            }
+            else
+            {
+                timeSpentUnseen += Time.deltaTime;
+            }
+        }
+        else
+        {
+            timeSpentUnseen += Time.deltaTime;
+        }
+        if(timeSpentUnseen > gracePeriod)
         {
             EndGame();
         }
@@ -55,7 +75,7 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
-
+        Debug.Log("biti");
         Time.timeScale = 0;
 
     }

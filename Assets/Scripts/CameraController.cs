@@ -1,65 +1,92 @@
 using UnityEngine;
-using System.Collections;
 
 public class CameraController : MonoBehaviour
 {
- 
+    
+    private enum CameraState { Takip, Firlama, Kurtarma }
+
+
     public Transform player;
 
-    public float joltForwardSpeed = 15f;
-    public float rampAngle = -30.0f;
+    
+    public float joltForwardSpeed = 10f;
 
     
+    public float rampAngle = 30.0f;
+
+    public float recoveryJoltSpeed = 8f;
+
+    
+    private CameraState currentState;
     private Vector3 offset;
     private float initialX;
-    private bool isJolting = false;
 
     
-    private float rampYPerZ;
+    private float rampSlope;
 
     void Start()
     {
         if (player == null) { return; }
         offset = transform.position - player.position;
         initialX = transform.position.x;
-        isJolting = false;
+        currentState = CameraState.Takip;
 
-        float angleRad = - rampAngle * Mathf.Deg2Rad;
-        rampYPerZ = Mathf.Tan(angleRad);
+       
+        rampSlope = Mathf.Tan(Mathf.Abs(rampAngle) * Mathf.Deg2Rad);
     }
 
     void LateUpdate()
-    {       
-        if (player == null || GameManager.isGameOver)
-        {
-            return;
-        }
-       
-        if (isJolting)
-        {                     
-            float deltaZ = joltForwardSpeed * Time.deltaTime;           
-            float deltaY = deltaZ * rampYPerZ;
-          
-            transform.Translate(new Vector3(0, deltaY, deltaZ), Space.World);
-        }
+    {
         
-        else
-        {            
-            Vector3 targetPosition = player.position + offset;
-            targetPosition.x = initialX; 
-            transform.position = targetPosition;
+        if (player == null || GameManager.isGameOver) { return; }
+
+       
+        Vector3 targetPosition = player.position + offset;
+        targetPosition.x = initialX;
+
+        
+        switch (currentState)
+        {
+            
+            case CameraState.Takip:
+                transform.position = targetPosition; 
+                break;
+
+            
+            case CameraState.Firlama:
+                
+                float deltaZ = joltForwardSpeed * Time.deltaTime;
+                float deltaY = deltaZ * rampSlope; 
+
+                
+                transform.Translate(new Vector3(0, deltaY, deltaZ), Space.World);
+                break;
+
+            
+            case CameraState.Kurtarma:
+                
+                float recDeltaZ = recoveryJoltSpeed * Time.deltaTime;
+                float recDeltaY = recDeltaZ * rampSlope;
+                transform.Translate(new Vector3(0, recDeltaY, recDeltaZ), Space.World);
+
+               
+                if (targetPosition.z > transform.position.z)
+                {
+                    currentState = CameraState.Takip; 
+                    
+                }
+                break;
         }
     }
 
-    
     public void TriggerJolt()
-    {       
-        if (isJolting) return; 
-        isJolting = true;
+    {
+        if (currentState == CameraState.Takip)
+            currentState = CameraState.Firlama;
     }
     public void TriggerRecover()
     {
-        isJolting = false;
-
+        if (currentState == CameraState.Firlama)
+            currentState = CameraState.Kurtarma;
     }
 }

@@ -275,9 +275,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4217f6fdb6065b440820e09d1aab221a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  player: {fileID: 0}
-  cameraTransform: {fileID: 0}
-  _deathDistanceBehind: 3
+  player: {fileID: 471658442}
+  cameraTransform: {fileID: 1829461161}
+  gracePeriod: 2
+  raycastDistance: 50
 --- !u!4 &113786453
 Transform:
   m_ObjectHideFlags: 0
@@ -2535,8 +2536,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
   player: {fileID: 471658442}
-  joltForwardSpeed: 15
+  joltForwardSpeed: 10
   rampAngle: -30
+  recoveryJoltSpeed: 1
 --- !u!114 &1829461163
 MonoBehaviour:
   m_ObjectHideFlags: 0
