@@ -19,6 +19,10 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 1)]
     public float maskSpawnChance = 0.2f;
 
+    public GameObject coinPrefab;
+    [Range(0, 1)]
+    public float coinSpawnChance = 0.5f;
+
     private List<GameObject> activeSegments = new List<GameObject>();
     private Transform nextSpawnPoint;
 
@@ -78,6 +82,7 @@ public class LevelGenerator : MonoBehaviour
                 {
                     if(i == safeLaneIndex)
                     {
+                        TrySpawnCoin(spawnerParent.GetChild(i));
                         continue;
                     }
 
@@ -96,9 +101,20 @@ public class LevelGenerator : MonoBehaviour
                         {
                             Instantiate(maskPrefab, spawner.position, spawner.rotation, spawner);
                         }
+                        else
+                        {
+                            TrySpawnCoin(spawner);
+                        }
                     }
                 }
             }
+        }
+    }
+    void TrySpawnCoin(Transform spawnPoint)
+    {
+        if(coinPrefab != null && Random.value < coinSpawnChance)
+        {
+            Instantiate(coinPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
         }
     }
 }

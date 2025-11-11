@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
     [SerializeField] private float[] lanePositionsX;
     [SerializeField] private float laneChangeForce = 500f;
     [SerializeField] private float minSwipeDistance = 50.0f;
@@ -12,15 +13,24 @@ public class PlayerController : MonoBehaviour
     private int currentLane = 1;
     private Vector2 startTouchPosition;
     private Vector2 endTouchPosition;
-    private Rigidbody rb;
+
+    [HideInInspector] public Rigidbody rb;
+    [HideInInspector] public OxygenSlider oxygenSlider;
+    
 
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        if (rb == null)
+        if(instance == null)
         {
-            Debug.LogError("PlayerController bir Rigidbody bileşeni gerektiriyor!");
+            instance = this;
         }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+        rb = GetComponent<Rigidbody>();     
+        oxygenSlider = GetComponent<OxygenSlider>();
     }
     void Start()
     {
@@ -102,6 +112,7 @@ public class PlayerController : MonoBehaviour
             {
                 mainCamera.TriggerJolt();
             }
+            
         }
     }
     private void OnCollisionExit(Collision collision)
@@ -112,6 +123,7 @@ public class PlayerController : MonoBehaviour
             {
                 mainCamera.TriggerRecover();
             }
+           
         }
     }
 }

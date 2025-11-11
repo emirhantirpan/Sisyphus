@@ -12,5 +12,12 @@ public class MaskPickup : MonoBehaviour
             OxygenSlider.instance.ActivateMask(maskDuration);
             Destroy(gameObject);
         }
+
+        if (PlayerController.instance != null)
+        {
+            PlayerController.instance.oxygenSlider.ActivateMask(maskDuration);
+        }
+        
+        Destroy(gameObject);
     }
 }

@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    
+    public static CameraController instance;
+
     private enum CameraState { Takip, Firlama, Kurtarma }
 
 
@@ -23,7 +24,17 @@ public class CameraController : MonoBehaviour
 
     
     private float rampSlope;
-
+    private void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         if (player == null) { return; }
@@ -88,5 +99,9 @@ public class CameraController : MonoBehaviour
     {
         if (currentState == CameraState.Firlama)
             currentState = CameraState.Kurtarma;
+    }
+    public bool IsPlayerInTakipMode()
+    {
+        return currentState == CameraState.Takip;
     }
 }

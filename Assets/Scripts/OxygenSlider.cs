@@ -38,6 +38,9 @@ public class OxygenSlider : MonoBehaviour
         _slider.maxValue = _maxStamina;
         _slider.value = _stamina;
         _currentDecreaseRate = _normalDecreaseRate;
+
+        float savedRate = PlayerPrefs.GetFloat("SavedOxygenRate", 1.5f);
+        _normalDecreaseRate *= savedRate;
     }
     private void FixedUpdate()
     {
