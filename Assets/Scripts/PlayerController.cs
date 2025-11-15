@@ -41,10 +41,10 @@ public class PlayerController : MonoBehaviour
     {
        
         
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
         if (Input.GetMouseButtonDown(0)) { startTouchPosition = Input.mousePosition; }
         else if (Input.GetMouseButtonUp(0)) { endTouchPosition = Input.mousePosition; HandleSwipe(); }
-#endif
+#endif*/
 
 #if UNITY_ANDROID || UNITY_IOS
         if (Input.touchCount > 0)
