@@ -273,7 +273,7 @@ RectTransform:
   m_GameObject: {fileID: 52228278}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 63909557}
@@ -409,7 +409,7 @@ RectTransform:
   m_GameObject: {fileID: 63909556}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.54036, y: 0.54036, z: 0.54036}
+  m_LocalScale: {x: 0.80302894, y: 0.80302894, z: 0.80302894}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 52228279}
@@ -607,6 +607,7 @@ GameObject:
   m_Component:
   - component: {fileID: 113786453}
   - component: {fileID: 113786452}
+  - component: {fileID: 113786454}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -658,6 +659,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &113786454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113786451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c343b283d72b7c049825a3805541b9d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillController
+  doubleTapThreshold: 0.3
 --- !u!1 &129906421
 GameObject:
   m_ObjectHideFlags: 0
@@ -1056,7 +1070,7 @@ Rigidbody:
   m_GameObject: {fileID: 471658437}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1072,7 +1086,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 112
+  m_Constraints: 116
   m_CollisionDetection: 1
 --- !u!114 &471658444
 MonoBehaviour:
@@ -1357,7 +1371,7 @@ RectTransform:
   m_GameObject: {fileID: 487469234}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.0958, y: 2.0958, z: 2.0958}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 745686148}
@@ -2496,7 +2510,7 @@ RectTransform:
   m_GameObject: {fileID: 1308384708}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.0869, y: 2.0869, z: 2.0869}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1210903972}
@@ -3688,13 +3702,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1829461158}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.67, z: -12.35}
+  m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
+  m_LocalPosition: {x: 0, y: 7, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 0, z: 0}
 --- !u!114 &1829461162
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3709,7 +3723,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
   player: {fileID: 471658442}
   joltForwardSpeed: 10
-  rampAngle: -30
+  rampAngle: 0
   recoveryJoltSpeed: 1
 --- !u!114 &1829461163
 MonoBehaviour:
@@ -3782,7 +3796,7 @@ RectTransform:
   m_GameObject: {fileID: 1870382667}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.0251, y: 2.0251, z: 2.0251}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 63909557}

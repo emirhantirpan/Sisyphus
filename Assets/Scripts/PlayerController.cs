@@ -1,13 +1,14 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
     [SerializeField] private float[] lanePositionsX;
-    [SerializeField] private float laneChangeForce = 500f;
-    [SerializeField] private float minSwipeDistance = 50.0f;
-    [SerializeField] private float forwardForce = 1000f;
-     private CameraController mainCamera;
+    [SerializeField] private float laneChangeForce = 3500f;
+    [SerializeField] public float minSwipeDistance = 50.0f;
+    [SerializeField] public float forwardForce = 1000f;
+    private CameraController mainCamera;
 
  
     private int currentLane = 1;
@@ -16,8 +17,7 @@ public class PlayerController : MonoBehaviour
 
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public OxygenSlider oxygenSlider;
-    
-
+  
     void Awake()
     {
         if(instance == null)
@@ -54,6 +54,7 @@ public class PlayerController : MonoBehaviour
             else if (touch.phase == TouchPhase.Ended) { endTouchPosition = Input.mousePosition; HandleSwipe(); }
         }
 #endif
+        
     }
 
     
@@ -63,24 +64,20 @@ public class PlayerController : MonoBehaviour
 
         
         rb.AddForce(Vector3.forward * forwardForce * Time.fixedDeltaTime, ForceMode.Acceleration);
-
-
-        float targetX = lanePositionsX[currentLane];
-
         
-        float xDifference = targetX - rb.position.x;
-
-       
+        float targetX = lanePositionsX[currentLane];
+        float xDifference = targetX - rb.position.x;       
         float horizontalForce = xDifference * laneChangeForce;
-
        
         Vector3 currentVelocity = rb.linearVelocity;
-        currentVelocity.x *= 0.8f; 
+        currentVelocity.x *= 0.8f;
         rb.linearVelocity = currentVelocity;
 
-       
         rb.AddForce(Vector3.right * horizontalForce * Time.fixedDeltaTime, ForceMode.Acceleration);
+
+        
     }
+
 
   
 

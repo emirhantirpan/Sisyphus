@@ -120,6 +120,12 @@ public class GameManager : MonoBehaviour
         {
             scoreText.text = "Score: " + score.ToString("F0");
         }
+
+        if (OxygenSlider.instance._stamina == 0)
+        {
+            EndGame();
+            Time.timeScale = 0;
+        }
     }
 
     private void CheckIfPlayerIsVisible()
@@ -236,9 +242,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void RestartGame()
+    /*public void RestartGame()
     {
         Time.timeScale = 1;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+    }*/
 }

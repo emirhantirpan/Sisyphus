@@ -15,7 +15,7 @@ public class OxygenSlider : MonoBehaviour
     [SerializeField] private float _maskDecreaseRate = 3f;
     
 
-    private float _stamina;
+    public float _stamina;
     private float _movement;
 
     private float _currentDecreaseRate;
