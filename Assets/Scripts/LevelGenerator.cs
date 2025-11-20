@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -117,4 +118,17 @@ public class LevelGenerator : MonoBehaviour
             Instantiate(coinPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
         }
     }
+
+    //private IEnumerator TrySpawnMask(Transform spawnPoint)
+    //{
+    //    OxygenSlider.instance._isMaskActive = false;
+        
+    //    Debug.Log("instantiate ediliyor");
+    //    OxygenSlider.instance._isMaskActive = true;
+    //    Debug.Log("instantiate etmek için 10 saniye bekleniyor");
+    //    yield return new WaitForSecondsRealtime(10f);
+    //    Debug.Log("instantiate etmek için 10 saniye bitti");
+    //    OxygenSlider.instance._isMaskActive = false;
+    //}
+   
 }

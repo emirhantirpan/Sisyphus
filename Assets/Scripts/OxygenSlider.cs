@@ -19,7 +19,7 @@ public class OxygenSlider : MonoBehaviour
     private float _movement;
 
     private float _currentDecreaseRate;
-    private bool _isMaskActive = false;
+    public bool _isMaskActive = false;
 
     private void Awake()
     {
