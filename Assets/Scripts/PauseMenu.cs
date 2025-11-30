@@ -4,10 +4,9 @@ using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
-    public static PauseMenu instance;
+    //public static PauseMenu instance;
 
-    [SerializeField] private GameObject _pausePanel;
-    [SerializeField] private Button _pauseButton;
+    public GameObject pausePanel;
     [SerializeField] private Button _resumeButton;
     [SerializeField] private Button _homeButton;
     [SerializeField] private Button _volumeButton;
@@ -21,11 +20,11 @@ public class PauseMenu : MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
+        //instance = this;
 
-        PanelController.instance.ClosePanel(_pausePanel);
+        PanelController.instance.ClosePanel(pausePanel);
 
-        _pauseButton.onClick.AddListener(PauseButton);
+
         _resumeButton.onClick.AddListener(ResumeButton);
         _homeButton.onClick.AddListener(HomeButton);
         _volumeButton.onClick.AddListener(VolumeButton);
@@ -37,18 +36,10 @@ public class PauseMenu : MonoBehaviour
         //LoadAudioSettings();
     }
 
-    public void PauseButton()
-    {
-       
-            _pausePanel.SetActive(true);
-            Time.timeScale = 0f;
-        
-        
-    }
-
     public void ResumeButton()
     {
-        PanelController.instance.ClosePanel(_pausePanel);
+        PanelController.instance.ClosePanel(pausePanel);
+        PanelController.instance.ClosePanel(pausePanel);
         Time.timeScale = 1f;
         //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
     }
