@@ -5,41 +5,69 @@ public class CoinManager : MonoBehaviour
 {
     public static CoinManager instance;
 
-    public TextMeshProUGUI coinText;
-    public TextMeshProUGUI totalCoinText;
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI coinText;
+    [SerializeField] private TextMeshProUGUI totalCoinText;
 
-    public int sessionCoins = 0;
-    public int totalCoins = 0;
+    private int sessionCoins = 0;
+    private int totalCoins = 0;
+
+    private const string TOTAL_COINS_KEY = "TotalCoins";
 
     private void Awake()
     {
-        if (instance == null) instance = this;
-        else { Destroy(gameObject); return; }
+        InitializeSingleton();
     }
 
     private void Start()
     {
-        totalCoins = PlayerPrefs.GetInt("TotalCoins", 0);
-        sessionCoins = 0;
-        UpdateCoinText();
+        LoadCoins();
+        ResetSessionCoins();
         UpdateTotalCoinText();
+    }
+
+    private void InitializeSingleton()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void LoadCoins()
+    {
+        totalCoins = PlayerPrefs.GetInt(TOTAL_COINS_KEY, 0);
     }
 
     public void AddCoin(int amount)
     {
-        if (GameStateManager.instance != null && GameStateManager.instance.isGameOver) return;
+        if (IsGameOver()) return;
 
         sessionCoins += amount;
         totalCoins += amount;
+
         UpdateCoinText();
         UpdateTotalCoinText();
+        SaveCoins();
+    }
 
-        SaveCoins(); 
+    public void SpendCoins(int amount)
+    {
+        if (totalCoins >= amount)
+        {
+            totalCoins -= amount;
+            UpdateTotalCoinText();
+            SaveCoins();
+        }
     }
 
     public void SaveCoins()
     {
-        PlayerPrefs.SetInt("TotalCoins", totalCoins);
+        PlayerPrefs.SetInt(TOTAL_COINS_KEY, totalCoins);
         PlayerPrefs.Save();
         Debug.Log("Coins saved: " + totalCoins);
     }
@@ -52,11 +80,26 @@ public class CoinManager : MonoBehaviour
 
     private void UpdateCoinText()
     {
-        if (coinText != null) coinText.text = sessionCoins.ToString();
+        if (coinText != null)
+        {
+            coinText.text = sessionCoins.ToString();
+        }
     }
 
     private void UpdateTotalCoinText()
     {
-        if (totalCoinText != null) totalCoinText.text = totalCoins.ToString();
+        if (totalCoinText != null)
+        {
+            totalCoinText.text = totalCoins.ToString();
+        }
     }
+
+    private bool IsGameOver()
+    {
+        return GameStateManager.instance != null && GameStateManager.instance.isGameOver;
+    }
+
+    // Getters
+    public int GetSessionCoins() => sessionCoins;
+    public int GetTotalCoins() => totalCoins;
 }

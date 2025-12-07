@@ -5,55 +5,114 @@ public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager instance;
 
-    public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI highscoreText;
+    [Header("UI References")]
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI highscoreText;
 
-    public float scoreMultiplier = 1.5f;
+    [Header("Score Settings")]
+    [SerializeField] private float scoreMultiplier = 1.5f;
+
     private float score = 0;
     private float highscore = 0;
-
     private Transform player;
+
+    private const string HIGHSCORE_KEY = "Highscore";
 
     private void Awake()
     {
-        if (instance == null) instance = this;
-        else { Destroy(gameObject); return; }
+        InitializeSingleton();
     }
 
     private void Start()
     {
-        highscore = PlayerPrefs.GetFloat("Highscore", 0);
-        if (highscoreText != null) highscoreText.text = "Highscore: " + highscore.ToString("F0");
+        LoadHighscore();
+        UpdateHighscoreText();
     }
 
     private void Update()
     {
-        if (GameStateManager.instance != null && GameStateManager.instance.isGameOver) return;
+        if (IsGameOver()) return;
 
-        if (player == null && PlayerController.instance != null)
-            player = PlayerController.instance.transform;
+        CachePlayerReference();
+        UpdateScore();
+    }
 
-        if (player != null)
+    private void InitializeSingleton()
+    {
+        if (instance == null)
         {
-            float newScore = player.position.z * scoreMultiplier;
-            if (newScore > score) score = newScore;
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
-            if (scoreText != null) scoreText.text = "Score: " + score.ToString("F0");
+    private void LoadHighscore()
+    {
+        highscore = PlayerPrefs.GetFloat(HIGHSCORE_KEY, 0);
+    }
+
+    private void CachePlayerReference()
+    {
+        if (player == null && PlayerController.instance != null)
+        {
+            player = PlayerController.instance.transform;
+        }
+    }
+
+    private void UpdateScore()
+    {
+        if (player == null) return;
+
+        float newScore = player.position.z * scoreMultiplier;
+        if (newScore > score)
+        {
+            score = newScore;
+            UpdateScoreText();
+        }
+    }
+
+    private void UpdateScoreText()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score.ToString("F0");
+        }
+    }
+
+    private void UpdateHighscoreText()
+    {
+        if (highscoreText != null)
+        {
+            highscoreText.text = "Highscore: " + highscore.ToString("F0");
         }
     }
 
     public void ResetScore()
     {
         score = 0;
-        if (scoreText != null) scoreText.text = "Score: 0";
+        UpdateScoreText();
     }
 
     public void SaveHighscore()
     {
         if (score > highscore)
         {
-            PlayerPrefs.SetFloat("Highscore", score);
+            highscore = score;
+            PlayerPrefs.SetFloat(HIGHSCORE_KEY, score);
             PlayerPrefs.Save();
+            UpdateHighscoreText();
         }
     }
+
+    private bool IsGameOver()
+    {
+        return GameStateManager.instance != null && GameStateManager.instance.isGameOver;
+    }
+
+    // Getters
+    public float GetScore() => score;
+    public float GetHighscore() => highscore;
 }

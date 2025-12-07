@@ -4,7 +4,17 @@ public class OxygenManager : MonoBehaviour
 {
     private void Update()
     {
-        if (OxygenSlider.instance._stamina <= 0)
+        CheckOxygenLevel();
+    }
+
+    private void CheckOxygenLevel()
+    {
+        if (OxygenSlider.instance == null || GameStateManager.instance == null)
+            return;
+
+        if (OxygenSlider.instance.GetStamina() <= 0)
+        {
             GameStateManager.instance.EndGame();
+        }
     }
 }

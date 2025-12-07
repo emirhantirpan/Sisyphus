@@ -1,15 +1,27 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager instance;
 
-    public bool isGameOver = false;
+    public bool isGameOver { get; private set; } = false;
 
     private void Awake()
     {
-        if (instance == null) instance = this;
-        else { Destroy(gameObject); return; }
+        InitializeSingleton();
+    }
+
+    private void InitializeSingleton()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void EndGame()
@@ -17,25 +29,67 @@ public class GameStateManager : MonoBehaviour
         if (isGameOver) return;
 
         isGameOver = true;
+        SaveGameData();
+        ShowGameOverUI();
+        PauseGame();
 
-        if (ScoreManager.instance != null) ScoreManager.instance.SaveHighscore();
-        if (CoinManager.instance != null) CoinManager.instance.SaveCoins();
-        if (ShopManager.instance != null) ShopManager.instance.ShowShopPanel();
-
-        Time.timeScale = 0f; 
         Debug.Log("Game Over!");
+    }
+
+    private void SaveGameData()
+    {
+        if (ScoreManager.instance != null)
+        {
+            ScoreManager.instance.SaveHighscore();
+        }
+
+        if (CoinManager.instance != null)
+        {
+            CoinManager.instance.SaveCoins();
+        }
+    }
+
+    private void ShowGameOverUI()
+    {
+        if (ShopManager.instance != null)
+        {
+            ShopManager.instance.ShowShopPanel();
+        }
+    }
+
+    private void PauseGame()
+    {
+        Time.timeScale = 0f;
     }
 
     public void RestartGame()
     {
+        ResumeGame();
+        ResetGameState();
+        ReloadScene();
+    }
+
+    private void ResumeGame()
+    {
         Time.timeScale = 1f;
         isGameOver = false;
+    }
 
-        if (ScoreManager.instance != null) ScoreManager.instance.ResetScore();
-        if (CoinManager.instance != null) CoinManager.instance.ResetSessionCoins();
+    private void ResetGameState()
+    {
+        if (ScoreManager.instance != null)
+        {
+            ScoreManager.instance.ResetScore();
+        }
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene(
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
-        );
+        if (CoinManager.instance != null)
+        {
+            CoinManager.instance.ResetSessionCoins();
+        }
+    }
+
+    private void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

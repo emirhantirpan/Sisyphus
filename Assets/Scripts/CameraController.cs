@@ -49,7 +49,7 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         
-        if (player == null || GameManager.isGameOver) { return; }
+        if (player == null || GameStateManager.instance.isGameOver) { return; }
 
        
         Vector3 targetPosition = player.position + offset;

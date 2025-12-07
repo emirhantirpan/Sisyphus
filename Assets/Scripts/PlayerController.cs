@@ -1,97 +1,143 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController instance;
+
+    [Header("Lane Settings")]
     [SerializeField] private float[] lanePositionsX;
     [SerializeField] private float laneChangeForce = 3500f;
-    [SerializeField] public float minSwipeDistance = 50.0f;
-    [SerializeField] public float forwardForce = 1000f;
-    private CameraController mainCamera;
 
- 
-    private int currentLane = 1;
-    private Vector2 startTouchPosition;
-    private Vector2 endTouchPosition;
+    [Header("Movement Settings")]
+    public float minSwipeDistance = 50.0f;
+    [SerializeField] private float baseForwardForce = 1000f;
+    [SerializeField] private float horizontalDamping = 0.8f;
 
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public OxygenSlider oxygenSlider;
-  
-    void Awake()
+
+    private int currentLane = 1;
+    private Vector2 startTouchPosition;
+    private Vector2 endTouchPosition;
+    private CameraController mainCamera;
+    private float currentForwardForce;
+    private float speedBoostMultiplier = 1f;
+
+    private void Awake()
     {
-        if(instance == null)
+        InitializeSingleton();
+        InitializeComponents();
+    }
+
+    private void Start()
+    {
+        currentForwardForce = baseForwardForce;
+        CacheCamera();
+    }
+
+    private void Update()
+    {
+        HandleInput();
+    }
+
+    private void FixedUpdate()
+    {
+        ApplyMovement();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            TriggerCameraJolt();
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            TriggerCameraRecover();
+        }
+    }
+
+    private void InitializeSingleton()
+    {
+        if (instance == null)
         {
             instance = this;
         }
         else
         {
             Destroy(gameObject);
-            return;
         }
-        rb = GetComponent<Rigidbody>();     
+    }
+
+    private void InitializeComponents()
+    {
+        rb = GetComponent<Rigidbody>();
         oxygenSlider = GetComponent<OxygenSlider>();
     }
-    void Start()
+
+    private void CacheCamera()
     {
-        mainCamera = Camera.main.GetComponent<CameraController>();
+        if (Camera.main != null)
+        {
+            mainCamera = Camera.main.GetComponent<CameraController>();
+        }
     }
 
-    void Update()
+    private void HandleInput()
     {
-       
-        
-/*#if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0)) { startTouchPosition = Input.mousePosition; }
-        else if (Input.GetMouseButtonUp(0)) { endTouchPosition = Input.mousePosition; HandleSwipe(); }
-#endif*/
+        if (GameStateManager.instance != null && GameStateManager.instance.isGameOver)
+            return;
 
 #if UNITY_ANDROID || UNITY_IOS
+        HandleTouchInput();
+#elif UNITY_EDITOR
+        HandleMouseInput();
+#endif
+    }
+
+    private void HandleTouchInput()
+    {
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began) { startTouchPosition = touch.position; }
-            else if (touch.phase == TouchPhase.Ended) { endTouchPosition = Input.mousePosition; HandleSwipe(); }
+
+            if (touch.phase == TouchPhase.Began)
+            {
+                startTouchPosition = touch.position;
+            }
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                endTouchPosition = touch.position;
+                ProcessSwipe();
+            }
         }
-#endif
-        
     }
 
-    
-    void FixedUpdate()
+    private void HandleMouseInput()
     {
-        if (rb == null) return;
-
-        
-        rb.AddForce(Vector3.forward * forwardForce * Time.fixedDeltaTime, ForceMode.Acceleration);
-        
-        float targetX = lanePositionsX[currentLane];
-        float xDifference = targetX - rb.position.x;       
-        float horizontalForce = xDifference * laneChangeForce;
-       
-        Vector3 currentVelocity = rb.linearVelocity;
-        currentVelocity.x *= 0.8f;
-        rb.linearVelocity = currentVelocity;
-
-        rb.AddForce(Vector3.right * horizontalForce * Time.fixedDeltaTime, ForceMode.Acceleration);
-
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            startTouchPosition = Input.mousePosition;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            endTouchPosition = Input.mousePosition;
+            ProcessSwipe();
+        }
     }
 
-
-  
-
-    private void HandleSwipe()
+    private void ProcessSwipe()
     {
         float swipeDistanceX = endTouchPosition.x - startTouchPosition.x;
 
-        if (swipeDistanceX > minSwipeDistance)
+        if (Mathf.Abs(swipeDistanceX) > minSwipeDistance)
         {
-            ChangeLane(1);
-        }
-        else if (swipeDistanceX < -minSwipeDistance)
-        {
-            ChangeLane(-1);
+            int direction = swipeDistanceX > 0 ? 1 : -1;
+            ChangeLane(direction);
         }
     }
 
@@ -101,26 +147,64 @@ public class PlayerController : MonoBehaviour
         currentLane = Mathf.Clamp(newLane, 0, lanePositionsX.Length - 1);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void ApplyMovement()
     {
-        if (collision.gameObject.CompareTag("Obstacle"))
+        if (rb == null) return;
+
+        ApplyForwardForce();
+        ApplyLaneChangeForce();
+    }
+
+    private void ApplyForwardForce()
+    {
+        float effectiveForce = currentForwardForce * speedBoostMultiplier;
+        rb.AddForce(Vector3.forward * effectiveForce * Time.fixedDeltaTime, ForceMode.Acceleration);
+    }
+
+    private void ApplyLaneChangeForce()
+    {
+        float targetX = lanePositionsX[currentLane];
+        float xDifference = targetX - rb.position.x;
+        float horizontalForce = xDifference * laneChangeForce;
+
+        // Yatay hýzý azalt (damping)
+        Vector3 currentVelocity = rb.linearVelocity;
+        currentVelocity.x *= horizontalDamping;
+        rb.linearVelocity = currentVelocity;
+
+        // Hedefe doðru kuvvet uygula
+        rb.AddForce(Vector3.right * horizontalForce * Time.fixedDeltaTime, ForceMode.Acceleration);
+    }
+
+    private void TriggerCameraJolt()
+    {
+        if (mainCamera != null)
         {
-            if (mainCamera != null)
-            {
-                mainCamera.TriggerJolt();
-            }
-            
+            mainCamera.TriggerJolt();
         }
     }
-    private void OnCollisionExit(Collision collision)
+
+    private void TriggerCameraRecover()
     {
-        if(collision.gameObject.CompareTag("Obstacle"))
+        if (mainCamera != null)
         {
-            if (mainCamera != null)
-            {
-                mainCamera.TriggerRecover();
-            }
-           
+            mainCamera.TriggerRecover();
         }
     }
+
+    // Speed Boost Methods
+    public void SetSpeedBoost(float multiplier)
+    {
+        speedBoostMultiplier = multiplier;
+    }
+
+    public void ResetSpeedBoost()
+    {
+        speedBoostMultiplier = 1f;
+    }
+
+    // Getters
+    public int GetCurrentLane() => currentLane;
+    public float GetCurrentSpeed() => rb != null ? rb.linearVelocity.magnitude : 0f;
+    public bool IsSpeedBoosted() => speedBoostMultiplier > 1f;
 }

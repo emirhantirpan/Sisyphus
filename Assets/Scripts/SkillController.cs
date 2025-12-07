@@ -3,55 +3,177 @@ using UnityEngine;
 
 public class SkillController : MonoBehaviour
 {
-    private bool canUseSkill = true;
-    private float lastTapTime = 0;
+    public static SkillController instance;
+
+    [Header("Skill Settings")]
     [SerializeField] private float doubleTapThreshold = 0.3f;
-    private Vector2 firstTouchPos;
-   
-    void Update()
+    [SerializeField] private float boostMultiplier = 2.0f;
+    [SerializeField] private float boostDuration = 5.0f;
+    [SerializeField] private float cooldownDuration = 10.0f;
+
+    private bool canUseSkill = true;
+    private bool isSkillActive = false;
+    private float lastTapTime = 0f;
+    private Vector2 firstTouchPosition;
+    private Coroutine skillCoroutine;
+
+    private void Awake()
     {
-        if (canUseSkill == false)
+        InitializeSingleton();
+    }
+
+    private void Update()
+    {
+        if (!CanProcessInput()) return;
+        HandleDoubleTapInput();
+    }
+
+    private void InitializeSingleton()
+    {
+        if (instance == null)
         {
-            return;
+            instance = this;
         }
-        if(Input.touchCount == 1)
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private bool CanProcessInput()
+    {
+        return canUseSkill &&
+               !isSkillActive &&
+               PlayerController.instance != null &&
+               GameStateManager.instance != null &&
+               !GameStateManager.instance.isGameOver;
+    }
+
+    private void HandleDoubleTapInput()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        HandleTouchDoubleTap();
+#elif UNITY_EDITOR
+        HandleMouseDoubleTap();
+#endif
+    }
+
+    private void HandleTouchDoubleTap()
+    {
+        if (Input.touchCount == 1)
         {
             Touch touch = Input.GetTouch(0);
+
             if (touch.phase == TouchPhase.Began)
             {
-                firstTouchPos = touch.position;
+                firstTouchPosition = touch.position;
             }
             else if (touch.phase == TouchPhase.Ended)
             {
-                float distance = Vector2.Distance(firstTouchPos, touch.position);
-
-                if (distance < PlayerController.instance.minSwipeDistance)
-                {
-                    if (Time.time - lastTapTime <= doubleTapThreshold)
-                    {
-                        lastTapTime = 0;
-                        canUseSkill = false;
-                        Debug.Log("Double Tap Algilandi");
-                        PlayerController.instance.forwardForce = 2000f;
-                        StartCoroutine(SetDoubleTap());
-                    }
-                    else
-                    {
-                        lastTapTime = Time.time;
-                    }
-                }
+                ProcessTapEnd(touch.position);
             }
-            
         }
     }
-    private IEnumerator SetDoubleTap()
+
+    private void HandleMouseDoubleTap()
     {
-        Debug.Log("Sayac basladi");
-        yield return new WaitForSeconds(5f);
-        PlayerController.instance.forwardForce = 1000f;
-        Debug.Log("Hizlanma bitti");
-        yield return new WaitForSeconds(10f);
+        if (Input.GetMouseButtonDown(0))
+        {
+            firstTouchPosition = Input.mousePosition;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            ProcessTapEnd(Input.mousePosition);
+        }
+    }
+
+    private void ProcessTapEnd(Vector2 endPosition)
+    {
+        float distance = Vector2.Distance(firstTouchPosition, endPosition);
+
+        if (IsTapNotSwipe(distance))
+        {
+            CheckForDoubleTap();
+        }
+    }
+
+    private bool IsTapNotSwipe(float distance)
+    {
+        return distance < PlayerController.instance.minSwipeDistance;
+    }
+
+    private void CheckForDoubleTap()
+    {
+        float timeSinceLastTap = Time.time - lastTapTime;
+
+        if (timeSinceLastTap <= doubleTapThreshold)
+        {
+            ActivateSkill();
+            lastTapTime = 0f;
+        }
+        else
+        {
+            lastTapTime = Time.time;
+        }
+    }
+
+    private void ActivateSkill()
+    {
+        if (skillCoroutine != null)
+        {
+            StopCoroutine(skillCoroutine);
+        }
+
+        skillCoroutine = StartCoroutine(SkillSequence());
+        Debug.Log("Speed Boost Activated!");
+    }
+
+    private IEnumerator SkillSequence()
+    {
+        // Skill'i aktif et
+        isSkillActive = true;
+        ApplySpeedBoost();
+
+        // Boost süresini bekle
+        yield return new WaitForSeconds(boostDuration);
+
+        // Boost'u kaldýr
+        RemoveSpeedBoost();
+        Debug.Log("Speed Boost Ended");
+
+        // Cooldown baþlat
+        canUseSkill = false;
+        isSkillActive = false;
+
+        yield return new WaitForSeconds(cooldownDuration);
+
+        // Skill tekrar kullanýlabilir
         canUseSkill = true;
-        Debug.Log("Sayac bitti");
+        Debug.Log("Speed Boost Ready!");
+    }
+
+    private void ApplySpeedBoost()
+    {
+        if (PlayerController.instance != null)
+        {
+            PlayerController.instance.SetSpeedBoost(boostMultiplier);
+        }
+    }
+
+    private void RemoveSpeedBoost()
+    {
+        if (PlayerController.instance != null)
+        {
+            PlayerController.instance.ResetSpeedBoost();
+        }
+    }
+
+    // Getters
+    public bool IsSkillActive() => isSkillActive;
+    public bool CanUseSkill() => canUseSkill;
+    public float GetCooldownProgress()
+    {
+        if (canUseSkill) return 1f;
+        return 0f; // Bu deðer cooldown UI için kullanýlabilir
     }
 }

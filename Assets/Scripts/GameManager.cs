@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager instance;
+    /*public static GameManager instance;
     public static bool isGameOver = false;
 
     public Transform player;
@@ -240,6 +240,6 @@ public class GameManager : MonoBehaviour
 
             UpdateShopUI();
         }
-    }
+    }*/
 
 }

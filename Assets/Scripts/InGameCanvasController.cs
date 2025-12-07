@@ -4,34 +4,55 @@ using UnityEngine.UI;
 
 public class InGameCanvasController : MonoBehaviour
 {
-    [SerializeField] private PauseMenu _pauseMenu;
+    [Header("Menu References")]
+    [SerializeField] private PauseMenu pauseMenu;
 
-    [SerializeField] private Button _pauseButton;
-    [SerializeField] private Button _restartGameButton;
+    [Header("Button References")]
+    [SerializeField] private Button pauseButton;
+    [SerializeField] private Button restartGameButton;
 
-    private void Start()
-    {
-    }
     private void OnEnable()
     {
-        _pauseButton.onClick.AddListener(PauseButton);
-        _restartGameButton.onClick.AddListener(RestartGameButton);
-    }
-    private void OnDisable()
-    {
-        _pauseButton.onClick.RemoveListener(PauseButton);
-        _restartGameButton.onClick.RemoveListener(RestartGameButton);
+        RegisterButtonListeners();
     }
 
-    public void PauseButton()
+    private void OnDisable()
     {
-        _pauseMenu.pausePanel.SetActive(true);
-        Time.timeScale = 0f;
+        UnregisterButtonListeners();
     }
-    public void RestartGameButton()
+
+    private void RegisterButtonListeners()
     {
-        GameStateManager.instance.isGameOver = false;
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        if (pauseButton != null)
+            pauseButton.onClick.AddListener(OnPauseButtonClicked);
+
+        if (restartGameButton != null)
+            restartGameButton.onClick.AddListener(OnRestartButtonClicked);
+    }
+
+    private void UnregisterButtonListeners()
+    {
+        if (pauseButton != null)
+            pauseButton.onClick.RemoveListener(OnPauseButtonClicked);
+
+        if (restartGameButton != null)
+            restartGameButton.onClick.RemoveListener(OnRestartButtonClicked);
+    }
+
+    private void OnPauseButtonClicked()
+    {
+        if (pauseMenu != null && pauseMenu.pausePanel != null)
+        {
+            pauseMenu.pausePanel.SetActive(true);
+            Time.timeScale = 0f;
+        }
+    }
+
+    private void OnRestartButtonClicked()
+    {
+        if (GameStateManager.instance != null)
+        {
+            GameStateManager.instance.RestartGame();
+        }
     }
 }

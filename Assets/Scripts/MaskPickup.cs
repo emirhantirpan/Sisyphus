@@ -2,22 +2,22 @@ using UnityEngine;
 
 public class MaskPickup : MonoBehaviour
 {
-    public float maskDuration = 10f;
-
+    [SerializeField] private float maskDuration = 10f;
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            OxygenSlider.instance.ActivateMask(maskDuration);
+            ActivateMaskEffect();
             Destroy(gameObject);
         }
+    }
 
-        if (PlayerController.instance != null)
+    private void ActivateMaskEffect()
+    {
+        if (OxygenSlider.instance != null)
         {
-            PlayerController.instance.oxygenSlider.ActivateMask(maskDuration);
+            OxygenSlider.instance.ActivateMask(maskDuration);
         }
-        
-        Destroy(gameObject);
     }
 }

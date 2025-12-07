@@ -6,65 +6,144 @@ public class ShopManager : MonoBehaviour
 {
     public static ShopManager instance;
 
-    public GameObject panel;
-    public TextMeshProUGUI totalCoinText;
-    public TextMeshProUGUI oxygenLevelText;
-    public TextMeshProUGUI costText;
-    public Button upgradeButton;
+    [Header("UI References")]
+    [SerializeField] private GameObject panel;
+    [SerializeField] private TextMeshProUGUI totalCoinText;
+    [SerializeField] private TextMeshProUGUI sessionCoinText;
+    [SerializeField] private TextMeshProUGUI oxygenLevelText;
+    [SerializeField] private TextMeshProUGUI costText;
+    [SerializeField] private Button upgradeButton;
 
-    public int baseCost = 10;
-    public float decreaseAmount = 0.1f;
-    public float minRate = 0.2f;
-    public float rate = 1.5f;
+    [Header("Upgrade Settings")]
+    [SerializeField] private int baseCost = 10;
+    [SerializeField] private float decreaseAmount = 0.1f;
+    [SerializeField] private float minRate = 0.2f;
+    [SerializeField] private float startingRate = 1.5f;
+
+    private float currentRate;
+    private const string OXYGEN_RATE_KEY = "SavedOxygenRate";
 
     private void Awake()
     {
-        if (instance == null) instance = this;
-        else { Destroy(gameObject); return; }
+        InitializeSingleton();
     }
 
     private void Start()
     {
-        rate = PlayerPrefs.GetFloat("SavedOxygenRate", rate);
-        if (panel != null) panel.SetActive(false);
+        LoadOxygenRate();
+        HidePanel();
+    }
+
+    private void InitializeSingleton()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void LoadOxygenRate()
+    {
+        currentRate = PlayerPrefs.GetFloat(OXYGEN_RATE_KEY, startingRate);
     }
 
     public void ShowShopPanel()
     {
-        if (panel != null) panel.SetActive(true);
-        UpdateUI();
+        if (panel != null)
+        {
+            panel.SetActive(true);
+            UpdateUI();
+        }
+    }
+
+    public void HidePanel()
+    {
+        if (panel != null)
+        {
+            panel.SetActive(false);
+        }
     }
 
     private void UpdateUI()
     {
-        if (totalCoinText != null) totalCoinText.text = "Toplam Coin: " + CoinManager.instance.totalCoins;
-        if (oxygenLevelText != null) oxygenLevelText.text = "Oxygen Speed: " + rate.ToString("F1");
+        UpdateCoinDisplay();
+        UpdateOxygenDisplay();
+        UpdateUpgradeButton();
+    }
 
-        if (rate <= minRate)
+    private void UpdateCoinDisplay()
+    {
+        if (CoinManager.instance == null) return;
+
+        if (totalCoinText != null)
         {
-            if (costText != null) costText.text = "MAX LEVEL";
-            if (upgradeButton != null) upgradeButton.interactable = false;
+            totalCoinText.text = "Total Coins: " + CoinManager.instance.GetTotalCoins();
         }
-        else
+
+        if (sessionCoinText != null)
         {
-            if (costText != null) costText.text = "Upgrade (" + baseCost + ")";
-            if (upgradeButton != null) upgradeButton.interactable = (CoinManager.instance.totalCoins >= baseCost);
+            sessionCoinText.text = "Session Coins: " + CoinManager.instance.GetSessionCoins();
+        }
+    }
+
+    private void UpdateOxygenDisplay()
+    {
+        if (oxygenLevelText != null)
+        {
+            oxygenLevelText.text = "Oxygen Speed: " + currentRate.ToString("F1");
+        }
+    }
+
+    private void UpdateUpgradeButton()
+    {
+        bool isMaxLevel = currentRate <= minRate;
+        bool canAfford = CoinManager.instance != null &&
+                         CoinManager.instance.GetTotalCoins() >= baseCost;
+
+        if (costText != null)
+        {
+            costText.text = isMaxLevel ? "MAX LEVEL" : "Upgrade (" + baseCost + ")";
+        }
+
+        if (upgradeButton != null)
+        {
+            upgradeButton.interactable = !isMaxLevel && canAfford;
         }
     }
 
     public void Upgrade()
     {
-        if (CoinManager.instance.totalCoins < baseCost) return;
+        if (!CanUpgrade()) return;
 
-        CoinManager.instance.totalCoins -= baseCost;
-        CoinManager.instance.SaveCoins();
-
-        rate -= decreaseAmount;
-        rate = Mathf.Max(rate, minRate);
-
-        PlayerPrefs.SetFloat("SavedOxygenRate", rate);
-        PlayerPrefs.Save();
-
+        ProcessUpgrade();
+        SaveUpgrade();
         UpdateUI();
     }
+
+    private bool CanUpgrade()
+    {
+        return CoinManager.instance != null &&
+               CoinManager.instance.GetTotalCoins() >= baseCost &&
+               currentRate > minRate;
+    }
+
+    private void ProcessUpgrade()
+    {
+        CoinManager.instance.SpendCoins(baseCost);
+        currentRate -= decreaseAmount;
+        currentRate = Mathf.Max(currentRate, minRate);
+    }
+
+    private void SaveUpgrade()
+    {
+        PlayerPrefs.SetFloat(OXYGEN_RATE_KEY, currentRate);
+        PlayerPrefs.Save();
+    }
+
+    // Getter
+    public float GetCurrentRate() => currentRate;
 }

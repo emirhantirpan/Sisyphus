@@ -6,62 +6,113 @@ public class OxygenSlider : MonoBehaviour
 {
     public static OxygenSlider instance;
 
-    [SerializeField] private Slider _slider;
-    [SerializeField] private Rigidbody _rb;
-    [SerializeField] private float _maxStamina = 100f;
-    [SerializeField] private float _normalDecreaseRate = 10f;
-    [SerializeField] private float _maskDecreaseRate = 3f;
+    [Header("UI References")]
+    [SerializeField] private Slider slider;
 
-    public float _stamina;
-    private float _movement;
-    private float _currentDecreaseRate;
-    public bool _isMaskActive = false;
+    [Header("Oxygen Settings")]
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private float maxStamina = 100f;
+    [SerializeField] private float baseDecreaseRate = 10f;
+    [SerializeField] private float maskDecreaseRate = 3f;
+    [SerializeField] private float movementThreshold = 0.1f;
+
+    private float stamina;
+    private float currentDecreaseRate;
+    private bool isMaskActive = false;
+
+    private const string OXYGEN_RATE_KEY = "SavedOxygenRate";
 
     private void Awake()
     {
-        if (instance == null) instance = this;
-        else { Destroy(gameObject); return; }
+        InitializeSingleton();
     }
 
     private void Start()
     {
-        _stamina = _maxStamina;
-        _slider.maxValue = _maxStamina;
-        _slider.value = _stamina;
-        _currentDecreaseRate = _normalDecreaseRate;
-
-        float savedRate = PlayerPrefs.GetFloat("SavedOxygenRate", 1.5f);
-        _normalDecreaseRate *= savedRate;
+        InitializeOxygen();
+        LoadOxygenUpgrade();
     }
 
     private void FixedUpdate()
     {
-        OxygenRate();
+        UpdateOxygen();
     }
 
-    public void OxygenRate()
+    private void InitializeSingleton()
     {
-        _movement = _rb.linearVelocity.magnitude;
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
-        if (_movement > 0.1f)
-            _stamina -= _currentDecreaseRate * Time.fixedDeltaTime;
+    private void InitializeOxygen()
+    {
+        stamina = maxStamina;
+        currentDecreaseRate = baseDecreaseRate;
 
-        _stamina = Mathf.Clamp(_stamina, 0, _maxStamina);
-        _slider.value = _stamina;
+        if (slider != null)
+        {
+            slider.maxValue = maxStamina;
+            slider.value = stamina;
+        }
+    }
+
+    private void LoadOxygenUpgrade()
+    {
+        float savedMultiplier = PlayerPrefs.GetFloat(OXYGEN_RATE_KEY, 1.5f);
+        currentDecreaseRate = baseDecreaseRate * savedMultiplier;
+    }
+
+    private void UpdateOxygen()
+    {
+        if (rb == null) return;
+
+        float movement = rb.linearVelocity.magnitude;
+
+        if (movement > movementThreshold)
+        {
+            stamina -= currentDecreaseRate * Time.fixedDeltaTime;
+            stamina = Mathf.Clamp(stamina, 0, maxStamina);
+        }
+
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (slider != null)
+        {
+            slider.value = stamina;
+        }
     }
 
     public void ActivateMask(float duration)
     {
-        if (_isMaskActive) StopAllCoroutines();
-        StartCoroutine(MaskTimerCoroutine(duration));
+        if (isMaskActive)
+        {
+            StopAllCoroutines();
+        }
+        StartCoroutine(MaskEffectCoroutine(duration));
     }
 
-    private IEnumerator MaskTimerCoroutine(float duration)
+    private IEnumerator MaskEffectCoroutine(float duration)
     {
-        _isMaskActive = true;
-        _currentDecreaseRate = _maskDecreaseRate;
+        isMaskActive = true;
+        float normalRate = currentDecreaseRate;
+        currentDecreaseRate = maskDecreaseRate;
+
         yield return new WaitForSeconds(duration);
-        _currentDecreaseRate = _normalDecreaseRate;
-        _isMaskActive = false;
+
+        currentDecreaseRate = normalRate;
+        isMaskActive = false;
     }
+
+    // Getters
+    public float GetStamina() => stamina;
+    public bool IsMaskActive() => isMaskActive;
 }

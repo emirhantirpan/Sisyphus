@@ -1,134 +1,165 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections;
 
 public class LevelGenerator : MonoBehaviour
 {
-    public GameObject roadSegmentPrefab;
-    public Transform player;
-    public int initialSegments = 3;
-    public float spawnDistanceThreshold = 75.0f;
+    [Header("Road Settings")]
+    [SerializeField] private GameObject roadSegmentPrefab;
+    [SerializeField] private Transform player;
+    [SerializeField] private int initialSegments = 3;
+    [SerializeField] private float spawnDistanceThreshold = 75.0f;
 
-    public List<GameObject> obstaclePrefabs;
+    [Header("Obstacle Settings")]
+    [SerializeField] private List<GameObject> obstaclePrefabs;
     [Range(0, 1)]
-    public float minObstacleSpawnChance = 0.1f;
+    [SerializeField] private float minObstacleSpawnChance = 0.1f;
     [Range(0, 1)]
-    public float maxObstacleSpawnChance = 0.5f;
-    public float timeToMaxDifficulty = 120.0f;
+    [SerializeField] private float maxObstacleSpawnChance = 0.5f;
+    [SerializeField] private float timeToMaxDifficulty = 120.0f;
 
-    public GameObject maskPrefab;
+    [Header("Mask Settings")]
+    [SerializeField] private GameObject maskPrefab;
     [Range(0, 1)]
-    public float maskSpawnChance = 0.2f;
+    [SerializeField] private float maskSpawnChance = 0.2f;
 
-    public GameObject coinPrefab;
+    [Header("Coin Settings")]
+    [SerializeField] private GameObject coinPrefab;
     [Range(0, 1)]
-    public float coinSpawnChance = 0.5f;
+    [SerializeField] private float coinSpawnChance = 0.5f;
 
     private List<GameObject> activeSegments = new List<GameObject>();
     private Transform nextSpawnPoint;
+    private int maxActiveSegments;
 
-    void Start()
+    private void Start()
     {
-        GameObject initialSegment = Instantiate(roadSegmentPrefab);
-        initialSegment.transform.position = Vector3.zero;
-        activeSegments.Add(initialSegment);
-        nextSpawnPoint = initialSegment.transform.Find("SpawnPoint");
+        maxActiveSegments = initialSegments + 2;
+        InitializeLevel();
+    }
+
+    private void Update()
+    {
+        CheckAndSpawnSegment();
+        CleanupOldSegments();
+    }
+
+    private void InitializeLevel()
+    {
+        SpawnInitialSegment();
 
         for (int i = 1; i <= initialSegments; i++)
         {
             SpawnSegment(true);
         }
-
     }
-    private void Update()
+
+    private void SpawnInitialSegment()
     {
-        if (Vector3.Distance(player.position, nextSpawnPoint.position) < spawnDistanceThreshold)
+        GameObject initialSegment = Instantiate(roadSegmentPrefab);
+        initialSegment.transform.position = Vector3.zero;
+        activeSegments.Add(initialSegment);
+        nextSpawnPoint = initialSegment.transform.Find("SpawnPoint");
+    }
+
+    private void CheckAndSpawnSegment()
+    {
+        if (player == null || nextSpawnPoint == null) return;
+
+        float distanceToSpawnPoint = Vector3.Distance(player.position, nextSpawnPoint.position);
+
+        if (distanceToSpawnPoint < spawnDistanceThreshold)
         {
             SpawnSegment(true);
         }
-
-        if(activeSegments.Count > initialSegments + 2)
-        {
-            GameObject segmentToDestroy = activeSegments[0];
-
-            activeSegments.RemoveAt(0);
-
-            Destroy(segmentToDestroy);
-        }
-
     }
 
-    void SpawnSegment(bool spawnItems)
+    private void CleanupOldSegments()
     {
-        GameObject newSegment = Instantiate(roadSegmentPrefab,nextSpawnPoint.position, nextSpawnPoint.rotation);
-        activeSegments.Add(newSegment);
+        if (activeSegments.Count > maxActiveSegments)
+        {
+            GameObject segmentToDestroy = activeSegments[0];
+            activeSegments.RemoveAt(0);
+            Destroy(segmentToDestroy);
+        }
+    }
 
+    private void SpawnSegment(bool spawnItems)
+    {
+        GameObject newSegment = Instantiate(roadSegmentPrefab, nextSpawnPoint.position, nextSpawnPoint.rotation);
+        activeSegments.Add(newSegment);
         nextSpawnPoint = newSegment.transform.Find("SpawnPoint");
 
-        if (spawnItems && (obstaclePrefabs.Count > 0 || maskPrefab != null))
+        if (spawnItems)
         {
-            Transform spawnerParent = newSegment.transform.Find("ObstacleSpawners");
+            SpawnItemsOnSegment(newSegment);
+        }
+    }
 
-            if(spawnerParent != null && spawnerParent.childCount > 0    )
+    private void SpawnItemsOnSegment(GameObject segment)
+    {
+        Transform spawnerParent = segment.transform.Find("ObstacleSpawners");
+
+        if (spawnerParent == null || spawnerParent.childCount == 0) return;
+
+        float currentObstacleChance = CalculateObstacleChance();
+        int safeLaneIndex = Random.Range(0, spawnerParent.childCount);
+
+        for (int i = 0; i < spawnerParent.childCount; i++)
+        {
+            Transform spawner = spawnerParent.GetChild(i);
+
+            if (i == safeLaneIndex)
             {
-                float progress = Mathf.Clamp01(Time.timeSinceLevelLoad / timeToMaxDifficulty);
-
-                float currentObstacleChance = Mathf.Lerp(minObstacleSpawnChance, maxObstacleSpawnChance, progress);
-
-                int laneCount = spawnerParent.childCount;
-
-                int safeLaneIndex = Random.Range(0,laneCount);
-
-                for (int i = 0; i < laneCount; i++)
-                {
-                    if(i == safeLaneIndex)
-                    {
-                        TrySpawnCoin(spawnerParent.GetChild(i));
-                        continue;
-                    }
-
-                    Transform spawner = spawnerParent.GetChild(i);
-
-                    if(Random.value < currentObstacleChance)
-                    {
-                        int prefabIndex = Random.Range(0, obstaclePrefabs.Count);
-                        GameObject obstacleToSpawn = obstaclePrefabs[prefabIndex];
-                        Instantiate(obstacleToSpawn, spawner.position, spawner.rotation, spawner);
-
-                    }
-                    else
-                    {
-                        if(maskPrefab != null && Random.value < maskSpawnChance)
-                        {
-                            Instantiate(maskPrefab, spawner.position, spawner.rotation, spawner);
-                        }
-                        else
-                        {
-                            TrySpawnCoin(spawner);
-                        }
-                    }
-                }
+                TrySpawnCoin(spawner);
+            }
+            else
+            {
+                SpawnLaneContent(spawner, currentObstacleChance);
             }
         }
     }
-    void TrySpawnCoin(Transform spawnPoint)
+
+    private float CalculateObstacleChance()
     {
-        if(coinPrefab != null && Random.value < coinSpawnChance)
+        float progress = Mathf.Clamp01(Time.timeSinceLevelLoad / timeToMaxDifficulty);
+        return Mathf.Lerp(minObstacleSpawnChance, maxObstacleSpawnChance, progress);
+    }
+
+    private void SpawnLaneContent(Transform spawner, float obstacleChance)
+    {
+        if (Random.value < obstacleChance)
         {
-            Instantiate(coinPrefab, spawnPoint.position, spawnPoint.rotation, spawnPoint);
+            SpawnObstacle(spawner);
+        }
+        else if (maskPrefab != null && Random.value < maskSpawnChance)
+        {
+            SpawnMask(spawner);
+        }
+        else
+        {
+            TrySpawnCoin(spawner);
         }
     }
 
-    //private IEnumerator TrySpawnMask(Transform spawnPoint)
-    //{
-    //    OxygenSlider.instance._isMaskActive = false;
-        
-    //    Debug.Log("instantiate ediliyor");
-    //    OxygenSlider.instance._isMaskActive = true;
-    //    Debug.Log("instantiate etmek için 10 saniye bekleniyor");
-    //    yield return new WaitForSecondsRealtime(10f);
-    //    Debug.Log("instantiate etmek için 10 saniye bitti");
-    //    OxygenSlider.instance._isMaskActive = false;
-    //}
-   
+    private void SpawnObstacle(Transform spawner)
+    {
+        if (obstaclePrefabs == null || obstaclePrefabs.Count == 0) return;
+
+        int randomIndex = Random.Range(0, obstaclePrefabs.Count);
+        GameObject obstacleToSpawn = obstaclePrefabs[randomIndex];
+        Instantiate(obstacleToSpawn, spawner.position, spawner.rotation, spawner);
+    }
+
+    private void SpawnMask(Transform spawner)
+    {
+        Instantiate(maskPrefab, spawner.position, spawner.rotation, spawner);
+    }
+
+    private void TrySpawnCoin(Transform spawner)
+    {
+        if (coinPrefab != null && Random.value < coinSpawnChance)
+        {
+            Instantiate(coinPrefab, spawner.position, spawner.rotation, spawner);
+        }
+    }
 }
