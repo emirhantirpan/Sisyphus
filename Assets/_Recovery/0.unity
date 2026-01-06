@@ -1209,7 +1209,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OxygenSlider
   slider: {fileID: 1645465181}
   rb: {fileID: 471658443}
-  maxStamina: 200
+  maxStamina: 919999
   baseDecreaseRate: 10
   maskDecreaseRate: 3
   movementThreshold: 0.1
