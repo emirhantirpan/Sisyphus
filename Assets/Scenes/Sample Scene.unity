@@ -4023,7 +4023,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d1c826fd54634c49a04195eddb459cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelGenerator
-  roadSegmentPrefab: {fileID: 2097529586344625019, guid: 4592769702b664b40b81ba4423f7612b, type: 3}
+  roadSegmentPrefab: {fileID: 919132149155446097, guid: 54d182ecc43625e469ab8e6ad580e1d2, type: 3}
   player: {fileID: 471658442}
   initialSegments: 3
   spawnDistanceThreshold: 150
