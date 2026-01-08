@@ -57,6 +57,7 @@ public class VisibilityChecker : MonoBehaviour
 
             if (timeSpentUnseen > gracePeriod)
             {
+                Debug.Log("Checking visibility");
                 GameStateManager.instance.EndGame();
             }
         }

@@ -1074,7 +1074,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &471658438
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1162,7 +1162,7 @@ Transform:
   m_GameObject: {fileID: 471658437}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1577,6 +1577,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8700617353114198275, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1617,9 +1621,29 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 65702495048144492, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
       propertyPath: m_Name
       value: Sysyfos Son Hal FBX
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3515717276090252278, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7036213049465896255, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7869873546869171050, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1637,6 +1661,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1627877299}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1627877304}
   m_SourcePrefab: {fileID: 100100000, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
 --- !u!1 &525627866
 GameObject:
@@ -3689,9 +3716,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.3229102
-  m_Height: 1.7700529
+  m_Height: 1.7649117
   m_Direction: 1
-  m_Center: {x: -0.036222935, y: 0.8546026, z: 0}
+  m_Center: {x: -0.036222935, y: 0.8571732, z: 0}
 --- !u!54 &1627877300
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3701,7 +3728,7 @@ Rigidbody:
   m_GameObject: {fileID: 1627877298}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -3733,7 +3760,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OxygenSlider
   slider: {fileID: 1645465181}
   rb: {fileID: 1627877300}
-  maxStamina: 100000000
+  maxStamina: 3400
   baseDecreaseRate: 10
   maskDecreaseRate: 3
   movementThreshold: 0.1
@@ -3759,6 +3786,33 @@ MonoBehaviour:
   horizontalDamping: 0.8
   rb: {fileID: 0}
   oxygenSlider: {fileID: 0}
+--- !u!4 &1627877303 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+  m_PrefabInstance: {fileID: 523628082}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1627877304
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1627877298}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 0be88de5b9471ba4bb9a00e924704271, type: 3}
+  m_Controller: {fileID: 9100000, guid: 50dcf2a675a764f8c99d9df27b158f58, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1645465179
 GameObject:
   m_ObjectHideFlags: 0
@@ -4188,7 +4242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelGenerator
   roadSegmentPrefab: {fileID: 2097529586344625019, guid: 4592769702b664b40b81ba4423f7612b, type: 3}
-  player: {fileID: 471658442}
+  player: {fileID: 1627877303}
   initialSegments: 3
   spawnDistanceThreshold: 150
   obstaclePrefabs:
@@ -4483,7 +4537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d28d4ca7d7e33f4285ad8c1e2beda02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraController
-  player: {fileID: 471658442}
+  player: {fileID: 1627877303}
   joltForwardSpeed: 10
   rampAngle: 3
   recoveryJoltSpeed: 1

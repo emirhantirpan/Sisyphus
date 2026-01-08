@@ -14,6 +14,7 @@ public class OxygenManager : MonoBehaviour
 
         if (OxygenSlider.instance.GetStamina() <= 0)
         {
+            Debug.Log("Oxygen level is empty");
             GameStateManager.instance.EndGame();
         }
     }
