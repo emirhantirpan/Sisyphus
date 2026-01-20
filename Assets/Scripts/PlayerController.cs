@@ -167,12 +167,12 @@ public class PlayerController : MonoBehaviour
         float xDifference = targetX - rb.position.x;
         float horizontalForce = xDifference * laneChangeForce;
 
-        // Yatay hýzý azalt (damping)
+        // Yatay hï¿½zï¿½ azalt (damping)
         Vector3 currentVelocity = rb.linearVelocity;
         currentVelocity.x *= horizontalDamping;
         rb.linearVelocity = currentVelocity;
 
-        // Hedefe doðru kuvvet uygula
+        // Hedefe doï¿½ru kuvvet uygula
         rb.AddForce(Vector3.right * horizontalForce * Time.fixedDeltaTime, ForceMode.Acceleration);
     }
 

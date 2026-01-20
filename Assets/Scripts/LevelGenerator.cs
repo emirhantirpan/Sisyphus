@@ -159,7 +159,8 @@ public class LevelGenerator : MonoBehaviour
     {
         if (coinPrefab != null && Random.value < coinSpawnChance)
         {
-            Instantiate(coinPrefab, spawner.position, spawner.rotation, spawner);
+            Vector3 spawnpos = new Vector3(spawner.position.x, spawner.position.y + 1f, spawner.position.z);
+            Instantiate(coinPrefab, spawnpos, Quaternion.Euler(90,0,0), spawner);
         }
     }
 }
