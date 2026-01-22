@@ -11,6 +11,9 @@ public class ScoreManager : MonoBehaviour
 
     [Header("Score Settings")]
     [SerializeField] private float scoreMultiplier = 1.5f;
+    
+    private float externalMultiplier = 1f;
+
 
     private float score = 0;
     private float highscore = 0;
@@ -48,7 +51,10 @@ public class ScoreManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    public void SetExternalMultiplier(float value)
+    {
+        externalMultiplier = value;
+    }
     private void LoadHighscore()
     {
         highscore = PlayerPrefs.GetFloat(HIGHSCORE_KEY, 0);
@@ -66,7 +72,9 @@ public class ScoreManager : MonoBehaviour
     {
         if (player == null) return;
 
-        float newScore = player.position.z * scoreMultiplier;
+        float newScore = player.position.z * externalMultiplier;
+
+
         if (newScore > score)
         {
             score = newScore;

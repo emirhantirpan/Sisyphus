@@ -6,13 +6,14 @@ public class MainMenu : MonoBehaviour
 {
     public GameObject mainMenuPanel;
     public GameObject settingsPanel;
+    public GameObject marketPlacePanel;
 
-    [SerializeField] private Button _playButton;
+    [SerializeField] private Button _tapToPlayButton;
     [SerializeField] private Button _settingsButton;
-    [SerializeField] private Button _quitButton;
     [SerializeField] private Button _volumeButton;
     [SerializeField] private Button _musicButton;
     [SerializeField] private Button _backButton;
+    [SerializeField] private Button _marketPlaceButton;
 
     private bool _isVolumePlaying = true;
     private bool _isMusicPlaying = true;
@@ -25,17 +26,23 @@ public class MainMenu : MonoBehaviour
         PanelController.instance.OpenPanel(mainMenuPanel);
         PanelController.instance.ClosePanel(settingsPanel);
 
-        _playButton.onClick.AddListener(PlayButton);
+        _tapToPlayButton.onClick.AddListener(LoadGame);
         _settingsButton.onClick.AddListener(SettingsButton);
-        _quitButton.onClick.AddListener(QuitButton);
         _volumeButton.onClick.AddListener(VolumeButton);
         _musicButton.onClick.AddListener(MusicButton);
         _backButton.onClick.AddListener(BackButton);
+        _marketPlaceButton.onClick.AddListener(OpenMarketPlace);
 
         //LoadAudioSettings();
     }
 
-    private void PlayButton()
+    private void OpenMarketPlace()
+    {
+        PanelController.instance.OpenPanel(marketPlacePanel);
+        PanelController.instance.ClosePanel(mainMenuPanel);
+    }
+
+    private void LoadGame()
     {
         //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
         SceneManager.LoadScene("Sample Scene");
@@ -46,12 +53,8 @@ public class MainMenu : MonoBehaviour
         //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
         PanelController.instance.ClosePanel(mainMenuPanel);
         PanelController.instance.OpenPanel(settingsPanel);
-    }
-
-    private void QuitButton()
-    {
-        //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
-        Application.Quit();
+        
+        _tapToPlayButton.gameObject.SetActive(false);
     }
 
     private void VolumeButton()
@@ -99,11 +102,13 @@ public class MainMenu : MonoBehaviour
         button.image.color = color;
     }
 
-    private void BackButton()
+    public void BackButton()
     {
         PanelController.instance.ClosePanel(settingsPanel);
+        PanelController.instance.ClosePanel(marketPlacePanel);
         PanelController.instance.OpenPanel(mainMenuPanel);
         //SFXPlayer.instance.audioSourceSFX.PlayOneShot(SFXPlayer.instance.buttonClick);
+        _tapToPlayButton.gameObject.SetActive(true);
     }
 
     /*private void LoadAudioSettings()

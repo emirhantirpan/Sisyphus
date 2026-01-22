@@ -2,19 +2,19 @@ using UnityEngine;
 
 public class OxygenManager : MonoBehaviour
 {
+    private bool gameEnded = false;
+
     private void Update()
     {
-        CheckOxygenLevel();
-    }
+        if (gameEnded) return;
 
-    private void CheckOxygenLevel()
-    {
         if (OxygenSlider.instance == null || GameStateManager.instance == null)
             return;
 
-        if (OxygenSlider.instance.GetStamina() <= 0)
+        if (OxygenSlider.instance.GetStamina() <= 0f)
         {
-            Debug.Log("Oxygen level is empty");
+            gameEnded = true;
+            Debug.Log("Oxygen depleted → Game Over");
             GameStateManager.instance.EndGame();
         }
     }

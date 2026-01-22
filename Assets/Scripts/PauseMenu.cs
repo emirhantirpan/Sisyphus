@@ -1,123 +1,59 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
-    [Header("Panel Reference")]
-    public GameObject pausePanel;
+    public static PauseMenu Instance;
 
-    [Header("Button References")]
-    [SerializeField] private Button resumeButton;
-    [SerializeField] private Button homeButton;
-    [SerializeField] private Button volumeButton;
-    [SerializeField] private Button musicButton;
+    [Header("Pause UI")]
+    [SerializeField] private GameObject pauseCanvas;
+    [SerializeField] private GameObject pausePanel;
 
-    private bool isVolumePlaying = true;
-    private bool isMusicPlaying = true;
-
-    private const string VOLUME_PREF_KEY = "VolumeOn";
-    private const string MUSIC_PREF_KEY = "MusicOn";
-    private const string MAIN_MENU_SCENE = "MainMenuScene";
+    private bool isPaused = false;
 
     private void Awake()
     {
-        InitializePanel();
-        RegisterButtonListeners();
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
     }
 
     private void Start()
     {
-        LoadAudioSettings();
+        if (pauseCanvas != null)
+            pauseCanvas.SetActive(false);
     }
 
-    private void InitializePanel()
+    public void PauseGame()
     {
-        if (PanelController.instance != null && pausePanel != null)
-        {
-            PanelController.instance.ClosePanel(pausePanel);
-        }
+        if (isPaused) return;
+
+        isPaused = true;
+        Time.timeScale = 0f;
+
+        if (pauseCanvas != null)
+            pauseCanvas.SetActive(true);
+
+        if (pausePanel != null)
+            pausePanel.SetActive(true);
     }
 
-    private void RegisterButtonListeners()
+    public void ResumeGame()
     {
-        if (resumeButton != null)
-            resumeButton.onClick.AddListener(OnResumeButtonClicked);
+        if (!isPaused) return;
 
-        if (homeButton != null)
-            homeButton.onClick.AddListener(OnHomeButtonClicked);
-
-        if (volumeButton != null)
-            volumeButton.onClick.AddListener(OnVolumeButtonClicked);
-
-        if (musicButton != null)
-            musicButton.onClick.AddListener(OnMusicButtonClicked);
-    }
-
-    private void OnResumeButtonClicked()
-    {
-        if (PanelController.instance != null && pausePanel != null)
-        {
-            PanelController.instance.ClosePanel(pausePanel);
-            Time.timeScale = 1f;
-        }
-    }
-
-    private void OnHomeButtonClicked()
-    {
+        isPaused = false;
         Time.timeScale = 1f;
-        SceneManager.LoadScene(MAIN_MENU_SCENE);
+
+        if (pauseCanvas != null)
+            pauseCanvas.SetActive(false);
     }
 
-    private void OnVolumeButtonClicked()
+    public void TogglePause()
     {
-        isVolumePlaying = !isVolumePlaying;
-        SetButtonAlpha(volumeButton, isVolumePlaying);
-        SaveAudioSettings();
-
-        // SFX kontrol kodu buraya eklenebilir
-        // if (SFXPlayer.instance != null)
-        //     SFXPlayer.instance.audioSourceSFX.mute = !isVolumePlaying;
-    }
-
-    private void OnMusicButtonClicked()
-    {
-        isMusicPlaying = !isMusicPlaying;
-        SetButtonAlpha(musicButton, isMusicPlaying);
-        SaveAudioSettings();
-
-        // Müzik kontrol kodu buraya eklenebilir
-        // if (SFXPlayer.instance != null)
-        // {
-        //     if (isMusicPlaying)
-        //         PlayMusic(SFXPlayer.instance.backgroundMusic, true);
-        //     else
-        //         SFXPlayer.instance.audioSourceMusic.Stop();
-        // }
-    }
-
-    private void SetButtonAlpha(Button button, bool isActive)
-    {
-        if (button == null) return;
-
-        Color color = button.image.color;
-        color.a = isActive ? 1.0f : 136f / 255f;
-        button.image.color = color;
-    }
-
-    private void LoadAudioSettings()
-    {
-        isVolumePlaying = PlayerPrefs.GetInt(VOLUME_PREF_KEY, 1) == 1;
-        isMusicPlaying = PlayerPrefs.GetInt(MUSIC_PREF_KEY, 1) == 1;
-
-        SetButtonAlpha(volumeButton, isVolumePlaying);
-        SetButtonAlpha(musicButton, isMusicPlaying);
-    }
-
-    private void SaveAudioSettings()
-    {
-        PlayerPrefs.SetInt(VOLUME_PREF_KEY, isVolumePlaying ? 1 : 0);
-        PlayerPrefs.SetInt(MUSIC_PREF_KEY, isMusicPlaying ? 1 : 0);
-        PlayerPrefs.Save();
+        if (isPaused)
+            ResumeGame();
+        else
+            PauseGame();
     }
 }

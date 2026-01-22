@@ -32,6 +32,9 @@ public class GameStateManager : MonoBehaviour
         SaveGameData();
         ShowGameOverUI();
         PauseGame();
+        FindObjectOfType<GameplayItemApplier>()?.OnRunEnded();
+
+        ScoreManager.instance?.SaveHighscore();
 
         Debug.Log("Game Over!");
     }
@@ -56,7 +59,7 @@ public class GameStateManager : MonoBehaviour
             ShopManager.instance.ShowShopPanel();
         }
     }
-
+    
     private void PauseGame()
     {
         Time.timeScale = 0f;

@@ -1,58 +1,77 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using TMPro;
 using UnityEngine.UI;
 
 public class InGameCanvasController : MonoBehaviour
 {
-    [Header("Menu References")]
-    [SerializeField] private PauseMenu pauseMenu;
-
-    [Header("Button References")]
+    [Header("Buttons")]
     [SerializeField] private Button pauseButton;
-    [SerializeField] private Button restartGameButton;
+    [SerializeField] private Button restartButton;
 
-    private void OnEnable()
+    [Header("Texts")]
+    [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private TMP_Text coinText;
+    [SerializeField] private TMP_Text highscoreText;
+
+    [Header("GameOver Panel")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private TMP_Text totalCoinsText;
+    [SerializeField] private TMP_Text currentOxygenLevelText;
+
+    private bool gameOverShown;
+
+    private void Start()
     {
-        RegisterButtonListeners();
+        BindButtons();
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
     }
 
-    private void OnDisable()
+    private void Update()
     {
-        UnregisterButtonListeners();
+        UpdateLiveUI();
+        CheckGameOverState();
     }
 
-    private void RegisterButtonListeners()
+    private void UpdateLiveUI()
     {
-        if (pauseButton != null)
-            pauseButton.onClick.AddListener(OnPauseButtonClicked);
+        if (ScoreManager.instance != null && scoreText != null)
+            scoreText.text = ScoreManager.instance.GetScore().ToString("F0");
 
-        if (restartGameButton != null)
-            restartGameButton.onClick.AddListener(OnRestartButtonClicked);
+        if (CoinManager.instance != null && coinText != null)
+            coinText.text = CoinManager.instance.GetSessionCoins().ToString();
+
+        if (ScoreManager.instance != null && highscoreText != null)
+            highscoreText.text = ScoreManager.instance.GetHighscore().ToString("F0");
     }
 
-    private void UnregisterButtonListeners()
+    private void CheckGameOverState()
     {
-        if (pauseButton != null)
-            pauseButton.onClick.RemoveListener(OnPauseButtonClicked);
+        if (GameStateManager.instance == null) return;
 
-        if (restartGameButton != null)
-            restartGameButton.onClick.RemoveListener(OnRestartButtonClicked);
+        if (GameStateManager.instance.isGameOver && !gameOverShown)
+            ShowGameOver();
     }
 
-    private void OnPauseButtonClicked()
+    private void ShowGameOver()
     {
-        if (pauseMenu != null && pauseMenu.pausePanel != null)
-        {
-            pauseMenu.pausePanel.SetActive(true);
-            Time.timeScale = 0f;
-        }
+        gameOverShown = true;
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
+
+        if (CoinManager.instance != null && totalCoinsText != null)
+            totalCoinsText.text = CoinManager.instance.GetSessionCoins().ToString();
+
+        if (OxygenSlider.instance != null && currentOxygenLevelText != null)
+            currentOxygenLevelText.text =
+                OxygenSlider.instance.GetStamina().ToString("F0");
     }
 
-    private void OnRestartButtonClicked()
+    private void BindButtons()
     {
-        if (GameStateManager.instance != null)
-        {
-            GameStateManager.instance.RestartGame();
-        }
+        pauseButton?.onClick.AddListener(() => PauseMenu.Instance?.PauseGame());
+        restartButton?.onClick.AddListener(() => GameStateManager.instance?.RestartGame());
     }
 }
+

@@ -11,8 +11,8 @@ public class OxygenSlider : MonoBehaviour
 
     [Header("Oxygen Settings")]
     [SerializeField] private Rigidbody rb;
-    [SerializeField] private float maxStamina = 100f;
-    [SerializeField] private float baseDecreaseRate = 10f;
+    [SerializeField] private float maxStamina = 3400f;
+    [SerializeField] private float baseDecreaseRate = 3f;
     [SerializeField] private float maskDecreaseRate = 3f;
     [SerializeField] private float movementThreshold = 0.1f;
 
@@ -32,7 +32,11 @@ public class OxygenSlider : MonoBehaviour
         InitializeOxygen();
         LoadOxygenUpgrade();
     }
-
+    public void AddStamina(float amount)
+    {
+        stamina = Mathf.Clamp(stamina + amount, 0, maxStamina);
+        UpdateUI();
+    }
     private void FixedUpdate()
     {
         UpdateOxygen();
@@ -90,6 +94,12 @@ public class OxygenSlider : MonoBehaviour
             slider.value = stamina;
         }
     }
+    public void SetMaxStamina(float value)
+    {
+        maxStamina = value;
+        stamina = maxStamina;
+        UpdateUI();
+    }
 
     public void ActivateMask(float duration)
     {
@@ -111,7 +121,10 @@ public class OxygenSlider : MonoBehaviour
         currentDecreaseRate = normalRate;
         isMaskActive = false;
     }
-
+    public float GetStaminaNormalized()
+    {
+        return stamina / maxStamina;
+    }
     // Getters
     public float GetStamina() => stamina;
     public bool IsMaskActive() => isMaskActive;

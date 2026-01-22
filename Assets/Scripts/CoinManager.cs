@@ -11,6 +11,8 @@ public class CoinManager : MonoBehaviour
 
     private int sessionCoins = 0;
     private int totalCoins = 0;
+    
+    private int coinMultiplier = 1;
 
     private const string TOTAL_COINS_KEY = "TotalCoins";
 
@@ -37,7 +39,10 @@ public class CoinManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    public void SetCoinMultiplier(int value)
+    {
+        coinMultiplier = value;
+    }
     private void LoadCoins()
     {
         totalCoins = PlayerPrefs.GetInt(TOTAL_COINS_KEY, 0);
@@ -47,8 +52,11 @@ public class CoinManager : MonoBehaviour
     {
         if (IsGameOver()) return;
 
-        sessionCoins += amount;
-        totalCoins += amount;
+        int finalAmount = amount * coinMultiplier;
+        
+
+        sessionCoins += finalAmount;
+        totalCoins += finalAmount;
 
         UpdateCoinText();
         UpdateTotalCoinText();
