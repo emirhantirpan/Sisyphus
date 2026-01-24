@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 53403a6b8c33b5844ac1e7667817014c, type: 3}
-  m_Name: OxygenTube
+  m_Name: CoinMultiplier
   m_EditorClassIdentifier: Assembly-CSharp::MarketItemData
-  itemID: oxygen_tube
-  itemName: OxygenTube
-  itemType: 0
+  itemID: coin_multiplier
+  itemName: CoinMultiplier
+  itemType: 1
   icon: {fileID: 0}
   description: 
-  price: 100
+  price: 0
   isConsumable: 0
-  maxPurchases: 10
-  intValue: 20
-  floatValue: 0
+  maxPurchases: 5
+  intValue: 0
+  floatValue: 0.2

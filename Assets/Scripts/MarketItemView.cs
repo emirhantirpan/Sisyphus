@@ -8,9 +8,8 @@ public class MarketItemView : MonoBehaviour
     public Image iconImage;
     public TMP_Text nameText;
     public TMP_Text priceText;
+    public TMP_Text stackText;
     public Button buyButton;
-    [SerializeField] private TMP_Text stackText;
-
 
     private MarketItemData itemData;
     private MarketPlaceController marketplace;
@@ -20,37 +19,32 @@ public class MarketItemView : MonoBehaviour
         itemData = data;
         marketplace = controller;
 
-        iconImage.sprite = data.icon;
-        nameText.text = data.itemName;
-        priceText.text = data.price.ToString();
+        if (iconImage != null) iconImage.sprite = data.icon;
+        if (nameText != null) nameText.text = data.itemName;
+        if (priceText != null) priceText.text = data.price.ToString();
 
-        buyButton.onClick.RemoveAllListeners();
-        buyButton.onClick.AddListener(BuyItem);
-        
-        RefreshState();
+        if (buyButton != null)
+        {
+            buyButton.onClick.RemoveAllListeners();
+            buyButton.onClick.AddListener(() => marketplace.TryBuyItem(itemData));
+        }
     }
 
-    private void BuyItem()
-    {
-        marketplace.TryBuyItem(itemData);
-    }
     public void RefreshState()
     {
+        if (itemData == null) return;
+
         int count = MarketSaveManager.GetItemCount(itemData.itemID);
 
-        if (itemData.isConsumable)
+        if (stackText != null)
         {
-            stackText.gameObject.SetActive(count > 0);
-            stackText.text = "x" + count;
+            stackText.gameObject.SetActive(true);
+            stackText.text = $"x{count}/{itemData.maxPurchases}";
         }
-        else
-        {
-            if (count > 0)
-            {
-                buyButton.interactable = false;
-                priceText.text = "OWNED";
-            }
-        }
-    }
 
+        bool canBuy = count < itemData.maxPurchases;
+
+        if (buyButton != null) buyButton.interactable = canBuy;
+        if (!canBuy && priceText != null) priceText.text = "MAX";
+    }
 }

@@ -2,7 +2,8 @@ using UnityEngine;
 
 public enum MarketItemType
 {
-    OxygenTube,
+    OxygenUpgrade,
+    CoinMultiplier,
     ScoreMultiplier,
     DoubleClicker
 }
@@ -11,8 +12,8 @@ public enum MarketItemType
 public class MarketItemData : ScriptableObject
 {
     [Header("Identity")]
-    public string itemID;
-    public string itemName;
+    public string itemID;      // örn: oxygen_tube
+    public string itemName;    // UI adı
     public MarketItemType itemType;
 
     [Header("UI")]
@@ -22,7 +23,12 @@ public class MarketItemData : ScriptableObject
     [Header("Economy")]
     public int price;
     public bool isConsumable;
+    public int maxPurchases = 1;
 
     [Header("Gameplay Values")]
-    public int value; 
+    [Tooltip("OxygenUpgrade için: her satın alım başına artış (örn 20).")]
+    public int intValue = 0;
+
+    [Tooltip("Multiplier'lar için: her satın alım başına artış (örn 0.2).")]
+    public float floatValue = 0f;
 }

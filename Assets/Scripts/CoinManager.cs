@@ -6,15 +6,20 @@ public class CoinManager : MonoBehaviour
     public static CoinManager instance;
 
     [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI coinText;
-    [SerializeField] private TextMeshProUGUI totalCoinText;
+    [SerializeField] private TextMeshProUGUI coinText;       // Game: SessionCoins | Menu: LastRunCoins
+    [SerializeField] private TextMeshProUGUI totalCoinText;  // Total coins (her sahnede)
+
+    [Header("Scene Mode")]
+    [SerializeField] private bool isMenuScene = false; // Menü sahnesindeki CoinManager'da TRUE yap
 
     private int sessionCoins = 0;
     private int totalCoins = 0;
-    
-    private int coinMultiplier = 1;
+
+    private float coinMultiplier = 1f;
+    private bool doubleClickActive = false;
 
     private const string TOTAL_COINS_KEY = "TotalCoins";
+    private const string LAST_RUN_COINS_KEY = "LastRunCoins";
 
     private void Awake()
     {
@@ -24,82 +29,106 @@ public class CoinManager : MonoBehaviour
     private void Start()
     {
         LoadCoins();
-        ResetSessionCoins();
-        UpdateTotalCoinText();
+
+        if (isMenuScene)
+        {
+            UpdateMenuTexts();
+        }
+        else
+        {
+            ResetSessionCoins();
+            UpdateTotalCoinText();
+        }
     }
 
     private void InitializeSingleton()
     {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
     }
-    public void SetCoinMultiplier(int value)
-    {
-        coinMultiplier = value;
-    }
+
     private void LoadCoins()
     {
         totalCoins = PlayerPrefs.GetInt(TOTAL_COINS_KEY, 0);
     }
 
+    // --- MARKET / UPGRADE API ---
+    public bool HasEnough(int amount) => totalCoins >= amount;
+
+    public void SpendCoins(int amount)
+    {
+        if (totalCoins < amount) return;
+
+        totalCoins -= amount;
+        UpdateTotalCoinText();
+        SaveTotalCoins();
+    }
+
+    public void SetCoinMultiplier(float value) => coinMultiplier = Mathf.Max(0f, value);
+    public void SetDoubleClickActive(bool active) => doubleClickActive = active;
+
+    // --- GAMEPLAY ---
     public void AddCoin(int amount)
     {
         if (IsGameOver()) return;
 
-        int finalAmount = amount * coinMultiplier;
-        
+        float mult = coinMultiplier * (doubleClickActive ? 2f : 1f);
+        int finalAmount = Mathf.RoundToInt(amount * mult);
 
         sessionCoins += finalAmount;
         totalCoins += finalAmount;
 
-        UpdateCoinText();
-        UpdateTotalCoinText();
-        SaveCoins();
+        UpdateGameTexts();
+        SaveTotalCoins();
     }
 
-    public void SpendCoins(int amount)
+    /// <summary>
+    /// Run bittiğinde (GameOver) bir kere çağır: menüde göstermek için "son run coin" kaydeder.
+    /// </summary>
+    public void SaveLastRunCoins()
     {
-        if (totalCoins >= amount)
-        {
-            totalCoins -= amount;
-            UpdateTotalCoinText();
-            SaveCoins();
-        }
+        PlayerPrefs.SetInt(LAST_RUN_COINS_KEY, sessionCoins);
+        PlayerPrefs.Save();
     }
 
-    public void SaveCoins()
+    private void SaveTotalCoins()
     {
         PlayerPrefs.SetInt(TOTAL_COINS_KEY, totalCoins);
         PlayerPrefs.Save();
-        Debug.Log("Coins saved: " + totalCoins);
     }
 
     public void ResetSessionCoins()
     {
         sessionCoins = 0;
-        UpdateCoinText();
+        UpdateCoinText(sessionCoins); // Game sahnesinde session gösteriyoruz
     }
 
-    private void UpdateCoinText()
+    // --- UI ---
+    private void UpdateGameTexts()
+    {
+        // Game sahnesi: coinText = session
+        UpdateCoinText(sessionCoins);
+        UpdateTotalCoinText();
+    }
+
+    private void UpdateMenuTexts()
+    {
+        // Menu sahnesi: coinText = last run
+        int lastRunCoins = PlayerPrefs.GetInt(LAST_RUN_COINS_KEY, 0);
+        UpdateCoinText(lastRunCoins);
+        UpdateTotalCoinText();
+    }
+
+    private void UpdateCoinText(int value)
     {
         if (coinText != null)
-        {
-            coinText.text = sessionCoins.ToString();
-        }
+            coinText.text = value.ToString();
     }
 
     private void UpdateTotalCoinText()
     {
         if (totalCoinText != null)
-        {
             totalCoinText.text = totalCoins.ToString();
-        }
     }
 
     private bool IsGameOver()

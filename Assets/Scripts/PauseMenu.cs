@@ -1,4 +1,7 @@
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -7,8 +10,30 @@ public class PauseMenu : MonoBehaviour
     [Header("Pause UI")]
     [SerializeField] private GameObject pauseCanvas;
     [SerializeField] private GameObject pausePanel;
+    
+    [Header("Pause Panel Button")]
+    [SerializeField] private Button _resumeButton;
+
+    [SerializeField] private Button _homeBUton;
 
     private bool isPaused = false;
+
+    private void OnEnable()
+    {
+        _resumeButton.onClick.AddListener(() => ResumeGame());
+        _homeBUton.onClick.AddListener(() => HomeButton());
+    }
+
+    private void OnDisable()
+    {
+        _resumeButton.onClick.RemoveAllListeners();
+        _homeBUton.onClick.RemoveAllListeners();
+    }
+
+    private void HomeButton()
+    {
+        SceneManager.LoadScene("MainMneuScene");
+    }
 
     private void Awake()
     {
@@ -21,7 +46,7 @@ public class PauseMenu : MonoBehaviour
     private void Start()
     {
         if (pauseCanvas != null)
-            pauseCanvas.SetActive(false);
+            pauseCanvas.SetActive(true);
     }
 
     public void PauseGame()
@@ -45,8 +70,8 @@ public class PauseMenu : MonoBehaviour
         isPaused = false;
         Time.timeScale = 1f;
 
-        if (pauseCanvas != null)
-            pauseCanvas.SetActive(false);
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
     }
 
     public void TogglePause()

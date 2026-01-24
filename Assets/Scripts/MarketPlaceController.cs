@@ -15,58 +15,59 @@ public class MarketPlaceController : MonoBehaviour
         PopulateMarket();
     }
 
-    private void PopulateMarket()
+    public void PopulateMarket()
     {
+        if (itemsParent == null || itemPrefab == null) return;
+
         foreach (Transform child in itemsParent)
             Destroy(child.gameObject);
 
         foreach (var item in availableItems)
         {
+            if (item == null) continue;
+
             MarketItemView view = Instantiate(itemPrefab, itemsParent);
-            view.Setup(item, this);
+            view.Setup(item, this);     // MarketItemView parametresi MarketPlaceController olmalı (aşağıda veriyorum)
             view.RefreshState();
         }
-
     }
+
     public void TryBuyItem(MarketItemData item)
     {
-        // Non-consumable tekrar satın alınmasın
-        if (!item.isConsumable && MarketSaveManager.IsPurchased(item.itemID))
+        if (item == null) return;
+
+        // Cap kontrol
+        if (!MarketSaveManager.CanBuyMore(item.itemID, item.maxPurchases))
         {
-            Debug.Log("⚠ Bu item zaten satın alınmış");
+            Debug.Log("⚠ Bu item max seviyede.");
             return;
         }
 
-        if (!CurrencyManager.Instance.HasEnough(item.price))
+        // Coin kontrol (CoinManager'da HasEnough yok, mevcut totalCoins ile kontrol ediyoruz)
+        if (CoinManager.instance == null)
         {
-            Debug.Log("❌ Yetersiz para");
+            Debug.LogError("❌ CoinManager.instance yok!");
             return;
         }
 
-        CurrencyManager.Instance.Spend(item.price);
-
-        // KALICI KAYIT
-        MarketSaveManager.AddItem(item.itemID, item.isConsumable);
-
-        ApplyItemEffect(item);
-    }
-
-
-    private void ApplyItemEffect(MarketItemData item)
-    {
-        switch (item.itemType)
+        if (CoinManager.instance.GetTotalCoins() < item.price)
         {
-            case MarketItemType.OxygenTube:
-                Debug.Log("🫁 Oxygen + " + item.value);
-                break;
-
-            case MarketItemType.ScoreMultiplier:
-                Debug.Log("✖ Score Multiplier x" + item.value);
-                break;
-
-            case MarketItemType.DoubleClicker:
-                Debug.Log("🖱 Double Click Activated");
-                break;
+            Debug.Log("❌ Yetersiz coin");
+            return;
         }
+
+        // Öde
+        CoinManager.instance.SpendCoins(item.price);
+
+        // Kaydet
+        bool added = MarketSaveManager.TryAddItem(item.itemID, item.isConsumable, item.maxPurchases);
+        if (!added)
+        {
+            Debug.Log("⚠ Eklenemedi (cap).");
+            return;
+        }
+
+        // UI yenile
+        PopulateMarket();
     }
 }

@@ -10,70 +10,40 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI highscoreText;
 
     [Header("Score Settings")]
-    [SerializeField] private float scoreMultiplier = 1.5f;
-    
-    private float externalMultiplier = 1f;
+    [SerializeField] private float baseScoreMultiplier = 1.5f;
 
+    // Shop upgrade çarpanı: 1.0, 1.2, 1.4 ...
+    private float upgradeMultiplier = 1f;
 
-    private float score = 0;
-    private float highscore = 0;
+    private float score = 0f;
+    private float highscore = 0f;
     private Transform player;
 
     private const string HIGHSCORE_KEY = "Highscore";
 
     private void Awake()
     {
-        InitializeSingleton();
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
     }
 
     private void Start()
     {
-        LoadHighscore();
+        highscore = PlayerPrefs.GetFloat(HIGHSCORE_KEY, 0f);
         UpdateHighscoreText();
+        UpdateScoreText();
     }
 
     private void Update()
     {
         if (IsGameOver()) return;
 
-        CachePlayerReference();
-        UpdateScore();
-    }
-
-    private void InitializeSingleton()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-    public void SetExternalMultiplier(float value)
-    {
-        externalMultiplier = value;
-    }
-    private void LoadHighscore()
-    {
-        highscore = PlayerPrefs.GetFloat(HIGHSCORE_KEY, 0);
-    }
-
-    private void CachePlayerReference()
-    {
         if (player == null && PlayerController.instance != null)
-        {
             player = PlayerController.instance.transform;
-        }
-    }
 
-    private void UpdateScore()
-    {
         if (player == null) return;
 
-        float newScore = player.position.z * externalMultiplier;
-
+        float newScore = player.position.z * baseScoreMultiplier * upgradeMultiplier;
 
         if (newScore > score)
         {
@@ -82,25 +52,27 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    // GameplayItemApplier burayı çağıracak: 1.0 + 0.2*n
+    public void SetUpgradeMultiplier(float value)
+    {
+        upgradeMultiplier = Mathf.Max(0f, value);
+    }
+
     private void UpdateScoreText()
     {
         if (scoreText != null)
-        {
             scoreText.text = "Score: " + score.ToString("F0");
-        }
     }
 
     private void UpdateHighscoreText()
     {
         if (highscoreText != null)
-        {
             highscoreText.text = "Highscore: " + highscore.ToString("F0");
-        }
     }
 
     public void ResetScore()
     {
-        score = 0;
+        score = 0f;
         UpdateScoreText();
     }
 
@@ -109,7 +81,7 @@ public class ScoreManager : MonoBehaviour
         if (score > highscore)
         {
             highscore = score;
-            PlayerPrefs.SetFloat(HIGHSCORE_KEY, score);
+            PlayerPrefs.SetFloat(HIGHSCORE_KEY, highscore);
             PlayerPrefs.Save();
             UpdateHighscoreText();
         }
@@ -120,7 +92,6 @@ public class ScoreManager : MonoBehaviour
         return GameStateManager.instance != null && GameStateManager.instance.isGameOver;
     }
 
-    // Getters
     public float GetScore() => score;
     public float GetHighscore() => highscore;
 }

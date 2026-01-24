@@ -202,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
   scoreText: {fileID: 88178331}
   highscoreText: {fileID: 1459049103}
-  scoreMultiplier: 1.5
+  baseScoreMultiplier: 1.5
 --- !u!1 &36670516
 GameObject:
   m_ObjectHideFlags: 0
@@ -952,7 +952,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &287625008
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1580,7 +1580,6 @@ MonoBehaviour:
   scoreText: {fileID: 88178331}
   coinText: {fileID: 1209852438}
   highscoreText: {fileID: 1459049103}
-  oxygenSlider: {fileID: 1645465181}
   gameOverPanel: {fileID: 63909556}
   totalCoinsText: {fileID: 52228281}
   currentOxygenLevelText: {fileID: 1870382670}
@@ -1630,6 +1629,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoinManager
   coinText: {fileID: 1209852438}
   totalCoinText: {fileID: 52228281}
+  isMenuScene: 0
 --- !u!1 &647436387
 GameObject:
   m_ObjectHideFlags: 0
@@ -1754,6 +1754,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenu
   pauseCanvas: {fileID: 836234215}
   pausePanel: {fileID: 1495570859}
+  _resumeButton: {fileID: 955239373}
+  _homeBUton: {fileID: 1533671093}
 --- !u!114 &836234218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2870,7 +2872,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1495570860
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3393,6 +3395,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74d358dfb7243e640a12cba6b4cad21c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayItemApplier
+  baseOxygen: 100
+  baseScoreMultiplier: 1.5
+  oxygenUpgradeData: {fileID: 11400000, guid: 03dd6b50c7c6d8344b0a7d281fa753ce, type: 2}
+  coinMultiplierData: {fileID: 11400000, guid: fdfe9d305378a1b4b94b7473bde46aa9, type: 2}
+  scoreMultiplierData: {fileID: 11400000, guid: 06a85239ba308fe44b54f73a5bff27d0, type: 2}
+  doubleClickerData: {fileID: 11400000, guid: 2d701ee767b6f44459b3308b22ce9c27, type: 2}
 --- !u!4 &1816827496 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7476055045589324797, guid: ecec2deb33a464fde8776f09f2465896, type: 3}
@@ -3680,7 +3688,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1907207056}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a57ca8a4a8b3fab4abc51b08384ccbd6, type: 3}
   m_Name: 

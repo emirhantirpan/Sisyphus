@@ -12,11 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53403a6b8c33b5844ac1e7667817014c, type: 3}
   m_Name: "DoubleClicker\u0131tem"
   m_EditorClassIdentifier: Assembly-CSharp::MarketItemData
-  itemID: 3
+  itemID: double_clicker
   itemName: "DoubleClicker\u0131tem"
-  itemType: 2
+  itemType: 3
   icon: {fileID: 0}
   description: 
   price: 300
   isConsumable: 1
-  value: 0
+  maxPurchases: 20
+  intValue: 0
+  floatValue: 0
